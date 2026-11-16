@@ -2,15 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { Compass, LogIn, LogOut, Menu, X } from "lucide-react";
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import * as api from "./api";
-import AccountPage from "./pages/AccountPage";
-import AdminPage, { type AdminCarForm, type AdminDepartureForm, type AdminTourForm } from "./pages/AdminPage";
-import CarDetailsPage, { type CarReservation } from "./pages/CarDetailsPage";
-import HomePage from "./pages/HomePage";
-import Operator from "./pages/Operator";
-import SafariCarsPage from "./pages/SafariCarsPage";
-import SafariToursPage from "./pages/SafariToursPage";
-import ScenicFooter from "./pages/ScenicFooter";
-import TourDetailsPage from "./pages/TourDetailsPage";
+import AccountPage from "./components/AccountPage";
+import AdminPage, { type AdminCarForm, type AdminDepartureForm, type AdminTourForm } from "./components/AdminPage";
+import CarDetailsPage, { type CarReservation } from "./components/CarDetailsPage";
+import HomePage from "./components/HomePage";
+import Operator from "./components/Operator";
+import SafariCarsPage from "./components/SafariCarsPage";
+import SafariToursPage from "./components/SafariToursPage";
+import ScenicFooter from "./components/ScenicFooter";
+import TourDetailsPage from "./components/TourDetailsPage";
 import type { AddOn, AdminBooking, Booking, CarBooking, SafariCar, Tour, User } from "./types";
 
 export default function App() {

@@ -1,4 +1,7 @@
+# Wildpath Safaris - Robots.txt
+
 User-agent: *
 Allow: /
 
+# Sitemap location
 Sitemap: https://safaritours.dpdns.org/sitemap.xml

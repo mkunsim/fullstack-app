@@ -27,7 +27,7 @@ app.use(
 app.get(
   "/sitemap.xml",
   createSitemapMiddleware(
-    BACKEND_URL,
+    process.env.BACKEND_URL,
     process.env.SITEMAP_BASE_URL || "https://safaritours.dpdns.org"
   )
 );
