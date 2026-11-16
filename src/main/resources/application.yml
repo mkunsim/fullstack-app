@@ -1,0 +1,84 @@
+server:
+  port: 8080
+spring:
+  profiles:
+    active: prod
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/testdb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.ssl.trust: smtp.gmail.com
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  tour-operator.email: mmukunga@gmail.com
+  tour-operator.name: Simon M. Mwanza
+  auth:
+    cookie-secure: ${APP_AUTH_COOKIE_SECURE:true}
+    session-expiry-days: ${APP_AUTH_SESSION_EXPIRY_DAYS:30}
+  bookings:
+    hold-hours: ${BOOKING_HOLD_HOURS:72}
+    reminder-hours: ${BOOKING_REMINDER_HOURS:48}
+  admin:
+    initial-email: ${APP_ADMIN_EMAIL:}
+    initial-name: ${APP_ADMIN_NAME:Administrator}
+  payment:
+    provider: ${PAYMENT_PROVIDER:paystack}
+    paystack:
+      enabled: ${PAYSTACK_ENABLED:false}
+      secret-key: ${PAYSTACK_SECRET_KEY:}
+      base-url: https://api.paystack.co
+      callback-url: ${PAYSTACK_CALLBACK_URL:${app.frontend-url}/payment/callback}
+
+server.error.include-message: never
+
+---
+spring:
+  config:
+    activate:
+      on-profile: e2e
+  datasource:
+    url: jdbc:h2:mem:wildpath_e2e;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+  flyway:
+    enabled: false
+  mail:
+    host: e2e-mail
+    port: 1025
+    username: e2e@safaris.invalid
+    password: ""
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+      mail.smtp.starttls.required: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  jpa:
+    hibernate:
+      ddl-auto: update
