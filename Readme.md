@@ -142,3 +142,8 @@ Paystack is disabled by default and needs credentials plus an HTTPS callback for
 
 ## 16. License
 No `LICENSE` file is present; licensing and reuse terms have not been specified.
+
+
+
+
+ cloudflared tunnel run safaritours-tunnel

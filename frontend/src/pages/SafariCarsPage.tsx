@@ -2,8 +2,8 @@ import { ArrowRight, CheckCircle2, Compass, Users } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import CardItem from "./CardItem";
-import { filterCatalog, paginate, type CatalogSort } from "./catalogUtils.mjs";
-import type { SafariCar } from "./types";
+import { filterCatalog, paginate, type CatalogSort } from "../catalogUtils.mjs";
+import type { SafariCar } from "../types";
 
 const money = (amount: number) => new Intl.NumberFormat("en-US", {
   style: "currency",

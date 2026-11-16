@@ -1,6 +1,6 @@
 import { ArrowRight, Clock3, Heart, MapPin, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import type { Tour } from "./types";
+import type { Tour } from "../types";
 
 type HomePageProps = {
   tours: Tour[];

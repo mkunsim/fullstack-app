@@ -2,7 +2,7 @@ import { ArrowLeft, CalendarDays, Compass, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import EnquiryForm from "./EnquiryForm";
-import type { Tour } from "./types";
+import type { Tour } from "../types";
 
 function formatUsd(amount: number): string {
   return new Intl.NumberFormat("en-US", {

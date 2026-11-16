@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import PayNowButton from "./PayNowButton";
-import type { Booking, CarBooking, User } from "./types";
+import type { Booking, CarBooking, User } from "../types";
 
 interface AccountPageProps {
   user: User | null;

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import * as api from "./api";
+import * as api from "../api";
 
 type ScenicFooterProps = {
   totalHits: number | null;

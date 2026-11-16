@@ -3,7 +3,7 @@ import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createProxyMiddleware } from "http-proxy-middleware";
-import { createSitemap } from "./sitemap.mjs";
+import { createSitemapMiddleware } from "./sitemap.mjs";
 
 const app = express();
 
@@ -24,24 +24,13 @@ app.use(
   })
 );
 
-app.get("/sitemap.xml", async (_req, res) => {
-  try {
-    const backendUrl = BACKEND_URL.replace(/\/+$/, "");
-    const responses = await Promise.all([
-      fetch(`${backendUrl}/api/tours`),
-      fetch(`${backendUrl}/api/cars`)
-    ]);
-    if (responses.some((response) => !response.ok)) {
-      return res.status(502).type("text/plain").send("Could not load catalog sitemap entries.");
-    }
-
-    const [tours, cars] = await Promise.all(responses.map((response) => response.json()));
-    return res.type("application/xml").send(createSitemap(tours, cars, "https://safaritours.dpdns.org"));
-  } catch (error) {
-    console.error("Could not generate catalog sitemap:", error);
-    return res.status(502).type("text/plain").send("Could not load catalog sitemap entries.");
-  }
-});
+app.get(
+  "/sitemap.xml",
+  createSitemapMiddleware(
+    BACKEND_URL,
+    process.env.SITEMAP_BASE_URL || "https://safaritours.dpdns.org"
+  )
+);
 
 // Serve React production files
 app.use(express.static(distPath));

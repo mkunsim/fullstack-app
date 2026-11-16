@@ -2,7 +2,7 @@ import { ArrowLeft, CheckCircle2, Compass, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import EnquiryForm from "./EnquiryForm";
-import type { SafariCar } from "./types";
+import type { SafariCar } from "../types";
 
 export interface CarReservation {
   carId: number;

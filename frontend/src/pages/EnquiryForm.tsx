@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import * as api from "./api";
+import * as api from "../api";
 
 interface EnquiryFormProps {
   itemType: "TOUR" | "VEHICLE";

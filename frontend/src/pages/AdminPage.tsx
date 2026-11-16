@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router-dom";
-import type { AddOn, AdminBooking, CarBooking, SafariCar, Tour, User } from "./types";
+import type { AddOn, AdminBooking, CarBooking, SafariCar, Tour, User } from "../types";
 
 export interface AdminTourForm {
   name: string;
