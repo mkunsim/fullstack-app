@@ -15,9 +15,7 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest(properties = {
-        "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.sql.init.mode=never",
-        "spring.flyway.enabled=false"
+        "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class BookingAddOnPersistenceTest {
 

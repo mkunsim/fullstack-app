@@ -9,7 +9,10 @@ import lombok.Setter;
 import java.time.Instant;
 
 @Entity
-@Table(name = "mail_outbox")
+@Table(name = "mail_outbox", indexes = @Index(
+        name = "idx_mail_outbox_due",
+        columnList = "status,next_attempt_at"
+))
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

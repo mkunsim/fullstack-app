@@ -11,10 +11,17 @@ import java.time.LocalDateTime;
 import java.time.Instant;
 
 @Entity
-@Table(name = "car_bookings", indexes = @Index(
-        name = "idx_car_bookings_status_created_at",
-        columnList = "status,created_at"
-))
+@Table(name = "car_bookings", indexes = {
+        @Index(
+                name = "idx_car_bookings_status_created_at",
+                columnList = "status,created_at"
+        ),
+        @Index(
+                name = "uk_car_bookings_payment_reference",
+                columnList = "payment_reference",
+                unique = true
+        )
+})
 @Getter
 @Setter
 @ToString

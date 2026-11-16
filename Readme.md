@@ -17,7 +17,7 @@ Database
 PostgreSQL 16; H2 for E2E 
 
 Infrastructure
-Docker, Docker Compose, Flyway  
+Docker, Docker Compose, Hibernate schema generation
 
 Integrations
 SMTP, Paystack, Playwright; optional Cloudflare proxy/tunnel 
@@ -37,7 +37,7 @@ src/main/java/.../booking/    Tour booking lifecycle and notifications
 src/main/java/.../car/        Vehicle catalog and booking lifecycle
 src/main/java/.../payment/    Checkout, verification and webhooks
 src/main/java/.../security/   Email-code auth, sessions and roles
-src/main/resources/           Spring configuration and Flyway migrations
+src/main/resources/           Spring configuration
 ```
 Controllers expose HTTP APIs; services own workflows and transactions; repositories handle persistence. Pessimistic row locks protect inventory and payment completion.
 ## 4. Database design
@@ -51,7 +51,7 @@ flowchart LR
   CARS["CARS"] -->|car_id| CAR_BOOKINGS
   BOOKINGS --> BOOKING_SPECIAL_EXPERIENCES["BOOKING_SPECIAL_EXPERIENCES"]
 ```
-Flyway migrations V1–V6 are in `src/main/resources/db/migration`. The default production profile migrates with Flyway and validates the schema; the Docker profile currently uses Hibernate `update`, which should be reviewed before production use.
+Hibernate creates missing tables and updates the schema from the JPA entity mappings on startup (`spring.jpa.hibernate.ddl-auto=update`). There are no SQL migration scripts. Hibernate schema updates are convenient for development but should be reviewed carefully before production use; `update` does not perform reliable data migrations or handle every schema change.
 ## 5. Features and booking flow
 Customers can email an enquiry about a tour or vehicle before or instead of booking; enquiries do not create reservations. Tour requests hold departure capacity; vehicle requests hold overlapping dates. Configurable reminders and expiry release abandoned pending inventory. Admins confirm, decline, or cancel. Confirmed bookings can be paid in KES through Paystack after the customer reviews the quote and expiry.
 ```mermaid
@@ -132,7 +132,7 @@ flowchart LR
   API --> DB[(Private PostgreSQL)]
   API --> Services["SMTP + Paystack"]
 ```
-Apply reviewed Flyway migrations before rollout and verify `/api/tours`. No cloud provisioning pipeline is included.
+Start the application to let Hibernate create or update the schema, then verify `/api/tours`. No cloud provisioning pipeline is included.
 
 ## 14. Error handling and validation
 Jakarta Bean Validation checks request DTOs; services enforce ownership, status, inventory, and payment reference/amount/currency. The frontend displays API `message` values or HTTP status. Common codes: 400 invalid input, 401 unauthenticated, 403 forbidden, 404 missing resource, 409 conflict. Production hides exception messages.

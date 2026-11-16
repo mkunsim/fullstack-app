@@ -9,13 +9,8 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     open-in-view: false
-  flyway:
-    enabled: true
-    baseline-on-migrate: true
-    baseline-version: 0
-    locations: classpath:db/migration
   mail:
     host: smtp.gmail.com
     port: 587
@@ -59,11 +54,6 @@ spring:
     username: sa
     password: ""
     driver-class-name: org.h2.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-  flyway:
-    enabled: false
   mail:
     host: e2e-mail
     port: 1025
@@ -73,12 +63,3 @@ spring:
       mail.smtp.auth: false
       mail.smtp.starttls.enable: false
       mail.smtp.starttls.required: false
-
----
-spring:
-  config:
-    activate:
-      on-profile: docker
-  jpa:
-    hibernate:
-      ddl-auto: update
