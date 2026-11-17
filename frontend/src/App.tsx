@@ -13,6 +13,24 @@ import ScenicFooter from "./components/ScenicFooter";
 import TourDetailsPage from "./components/TourDetailsPage";
 import type { AddOn, AdminBooking, Booking, CarBooking, SafariCar, Tour, User } from "./types";
 
+const SITE_ORIGIN = "https://safaritours.dpdns.org";
+
+function setMetaTag(attribute: "name" | "property", key: string, content: string) {
+  const selector = `meta[${attribute}="${key}"]`;
+  let meta = document.head.querySelector<HTMLMetaElement>(selector);
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.setAttribute(attribute, key);
+    document.head.appendChild(meta);
+  }
+  meta.content = content;
+}
+
+function summarize(description: string) {
+  const normalized = description.replace(/\s+/g, " ").trim();
+  return normalized.length > 157 ? `${normalized.slice(0, 154).trimEnd()}...` : normalized;
+}
+
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -88,6 +106,75 @@ export default function App() {
   useEffect(() => {
     void refresh();
   }, []);
+
+  useEffect(() => {
+    const path = location.pathname.replace(/\/+$/, "") || "/";
+    let title = "Wildpath Safaris | Find your wild";
+    let description = "Discover safari tours and vehicle hire across East Africa with Wildpath Safaris.";
+    let indexable = false;
+
+    if (path === "/") {
+      description = "Explore East African safari tours and vehicle hire. Discover destinations, compare trips, and plan your next adventure with Wildpath Safaris.";
+      indexable = true;
+    } else if (path === "/safari-tours") {
+      title = "Safari Tours in East Africa | Wildpath Safaris";
+      description = "Explore East African safari tours, destinations, trip lengths, and upcoming departures with Wildpath Safaris.";
+      indexable = true;
+    } else if (path === "/safari-cars") {
+      title = "Safari Vehicle Hire in East Africa | Wildpath Safaris";
+      description = "Compare safari vehicles for hire across East Africa, including passenger capacity, destinations, and daily rates.";
+      indexable = true;
+    } else {
+      const tourMatch = path.match(/^\/safari-tours\/(\d+)$/);
+      const carMatch = path.match(/^\/safari-cars\/(\d+)$/);
+      const tour = tourMatch ? tours.find((item) => item.id === Number(tourMatch[1])) : undefined;
+      const car = carMatch ? cars.find((item) => item.id === Number(carMatch[1])) : undefined;
+
+      if (tourMatch) {
+        if (tour) {
+          title = `${tour.name} in ${tour.destination} | Wildpath Safaris`;
+          description = summarize(tour.description);
+          indexable = true;
+        } else if (loading) {
+          title = "Safari Tours in East Africa | Wildpath Safaris";
+          description = "Discover East African safari destinations and find a tour that suits your trip.";
+          indexable = true;
+        }
+      } else if (carMatch) {
+        if (car) {
+          title = `${car.name} Hire in ${car.destination} | Wildpath Safaris`;
+          description = summarize(car.description);
+          indexable = true;
+        } else if (loading) {
+          title = "Safari Vehicle Hire in East Africa | Wildpath Safaris";
+          description = "Explore safari vehicles for hire across East Africa with Wildpath Safaris.";
+          indexable = true;
+        }
+      } else if (path !== "/account" && path !== "/admin" &&
+                 path !== "/payment/callback" && path !== "/operator/booking-action") {
+        title = "Page not found | Wildpath Safaris";
+      }
+    }
+
+    document.title = title;
+    setMetaTag("name", "description", description);
+    setMetaTag("name", "robots", indexable ? "index,follow" : "noindex,nofollow");
+    setMetaTag("property", "og:title", title);
+    setMetaTag("property", "og:description", description);
+    setMetaTag("property", "og:url", `${SITE_ORIGIN}${path}`);
+
+    let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (indexable) {
+      if (!canonical) {
+        canonical = document.createElement("link");
+        canonical.rel = "canonical";
+        document.head.appendChild(canonical);
+      }
+      canonical.href = `${SITE_ORIGIN}${path}`;
+    } else {
+      canonical?.remove();
+    }
+  }, [cars, location.pathname, tours]);
 
   useEffect(() => {
     void api.currentUser().then(setUser).catch((reason: unknown) => {

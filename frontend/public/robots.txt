@@ -3,7 +3,9 @@
 User-agent: *
 Allow: /
 
+Disallow: /account
 Disallow: /admin
+Disallow: /operator/
 Disallow: /payment/
 
 # Sitemap location
