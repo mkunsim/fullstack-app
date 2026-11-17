@@ -3,5 +3,8 @@
 User-agent: *
 Allow: /
 
+Disallow: /admin
+Disallow: /payment/
+
 # Sitemap location
 Sitemap: https://safaritours.dpdns.org/sitemap.xml
