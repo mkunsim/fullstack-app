@@ -12,6 +12,8 @@ const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 5173;
 const BACKEND_URL = process.env.BACKEND_URL || "http://backend:8080";
+const SITEMAP_BASE_URL =
+  process.env.SITEMAP_BASE_URL || "https://safaritours.dpdns.org";
 const distPath = path.join(__dirname, "dist");
 
 // Forward API requests to Spring Boot
@@ -26,10 +28,7 @@ app.use(
 
 app.get(
   "/sitemap.xml",
-  createSitemapMiddleware(
-    BACKEND_URL,
-    process.env.SITEMAP_BASE_URL || "https://safaritours.dpdns.org"
-  )
+  createSitemapMiddleware( BACKEND_URL, SITEMAP_BASE_URL )
 );
 
 // Serve React production files
