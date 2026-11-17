@@ -27,7 +27,7 @@ app.use(
 app.get(
   "/sitemap.xml",
   createSitemapMiddleware(
-    process.env.BACKEND_URL,
+    BACKEND_URL,
     process.env.SITEMAP_BASE_URL || "https://safaritours.dpdns.org"
   )
 );
@@ -43,4 +43,5 @@ app.get(/.*/, (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Safari Tours running on port ${PORT}`);
   console.log(`Backend proxy: ${BACKEND_URL}`);
+  console.log(`Sitemap URL: ${SITEMAP_BASE_URL}/sitemap.xml`);
 });
