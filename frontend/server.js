@@ -16,6 +16,52 @@ const SITEMAP_BASE_URL =
   process.env.SITEMAP_BASE_URL || "https://safaritours.dpdns.org";
 const distPath = path.join(__dirname, "dist");
 
+
+// --------------------------------------------------
+// 1. Basic security
+// --------------------------------------------------
+
+app.disable("x-powered-by");
+
+// Security headers.
+// CSP is disabled here initially to avoid breaking
+// existing React scripts and external resources.
+// Configure a restrictive CSP separately.
+app.use(
+  helmet({
+    contentSecurityPolicy: false
+  })
+);
+
+// --------------------------------------------------
+// 2. Block sensitive file requests
+// --------------------------------------------------
+
+app.use((req, res, next) => {
+  const pathname = req.path.toLowerCase();
+
+  const blockedPatterns = [
+    /(?:^|\/)server\.js(?:\.map)?$/,
+    /(?:^|\/)\.env(?:\.[^/]*)?$/,
+    /(?:^|\/)\.git(?:\/|$)/,
+    /(?:^|\/)package(?:-lock)?\.json$/,
+    /(?:^|\/)config\.js$/,
+    /(?:^|\/)\.htaccess$/,
+    /(?:^|\/)\.htpasswd$/
+  ];
+
+  if (blockedPatterns.some(pattern => pattern.test(pathname))) {
+    console.warn(
+      `[SECURITY] Blocked request: ${req.method} ${req.path} from ${req.ip}`
+    );
+
+    return res.status(404).end();
+  }
+
+  next();
+});
+
+
 // Forward API requests to Spring Boot
 app.use(
   "/api",
