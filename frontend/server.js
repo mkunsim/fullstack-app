@@ -1,5 +1,6 @@
 
 import express from "express";
+import helmet from "helmet";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createProxyMiddleware } from "http-proxy-middleware";
@@ -51,12 +52,12 @@ app.use((req, res, next) => {
   ];
 
   if (blockedPatterns.some(pattern => pattern.test(pathname))) {
-    console.warn(
-      `[SECURITY] Blocked request: ${req.method} ${req.path} from ${req.ip}`
-    );
-
     return res.status(404).end();
   }
+
+  console.log(
+    `[SECURITY] Allowed request: ${req.method} ${req.path} from ${req.ip}`
+  );
 
   next();
 });
