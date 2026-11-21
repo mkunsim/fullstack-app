@@ -1,4 +1,4 @@
-import { ArrowLeft, CheckCircle2, Compass, Users } from "lucide-react";
+import { CheckCircle2, Compass, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import EnquiryForm from "./EnquiryForm";
@@ -54,7 +54,6 @@ export default function CarDetailsPage({ cars, loading, onBook }: CarDetailsPage
 
   return (
     <main className="detail-page">
-      <Link className="back-link" to="/safari-cars"><ArrowLeft size={16} /> All safari cars</Link>
       <div className="detail-layout">
         <div className="detail-content">
           <img className="detail-image" src={car.imageUrl} alt={car.name} />

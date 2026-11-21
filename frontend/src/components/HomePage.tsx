@@ -27,6 +27,17 @@ const heroImage = {
 
 export default function HomePage({ tours, loading }: HomePageProps) {
   const featuredTours = tours.slice(0, 3);
+  const destinations = new Map<string, { tour: Tour; count: number }>();
+  for (const tour of tours) {
+    const destination = tour.destination.trim();
+    if (!destination) continue;
+    const current = destinations.get(destination);
+    if (current) current.count += 1;
+    else destinations.set(destination, { tour, count: 1 });
+  }
+  const destinationHighlights = [...destinations.entries()]
+    .sort((left, right) => right[1].count - left[1].count)
+    .slice(0, 3);
 
   return (
     <main className="homepage-shell">
@@ -44,12 +55,62 @@ export default function HomePage({ tours, loading }: HomePageProps) {
             <em>adventure.</em>
           </h1>
           <p>Unforgettable safari experiences across Kenya, Tanzania and Uganda.</p>
-          <Link className="primary-btn" to="/safari-tours">
-            Explore Tours <ArrowRight size={16} />
-          </Link>
+          <div className="hero-actions">
+            <Link className="primary-btn" to="/safari-tours">
+              Explore Safari Tours <ArrowRight size={16} />
+            </Link>
+            <Link className="secondary-btn hero-secondary-btn" to="/safari-cars">
+              Browse Safari Vehicles <ArrowRight size={16} />
+            </Link>
+          </div>
         </div>
-
       </section>
+
+      <section className="promise-grid" id="promise" aria-label="Our promise">
+        {promisePoints.map(({ icon: Icon, title, subtitle }) => (
+          <div key={title} className="promise-item">
+            <span className="promise-icon">
+              <Icon size={18} />
+            </span>
+            <div>
+              <strong>{title}</strong>
+              <small>{subtitle}</small>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {destinationHighlights.length > 0 && (
+        <section className="destination-highlights">
+          <div className="section-head">
+            <div>
+              <span className="eyebrow dark">EXPLORE EAST AFRICA</span>
+              <h2>Choose your <em>destination.</em></h2>
+            </div>
+            <p>Start with a place that inspires you. Find a safari that fits your journey.</p>
+          </div>
+          <div className="destination-grid">
+            {destinationHighlights.map(([destination, highlight], index) => (
+              <Link
+                key={destination}
+                className="destination-card"
+                to={`/safari-tours?destination=${encodeURIComponent(destination)}`}
+                aria-label={`Explore ${highlight.count} safari tours in ${destination}`}
+              >
+                <img
+                  src={highlight.tour.imageUrl || safariImages[index % safariImages.length]}
+                  alt=""
+                />
+                <div className="destination-card-content">
+                  <span>{highlight.count} safari {highlight.count === 1 ? "tour" : "tours"}</span>
+                  <h3>{destination}</h3>
+                  <span className="destination-card-cta">Explore journeys <ArrowRight size={15} /></span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="featured-safaris">
         <div className="featured-copy">
@@ -102,21 +163,6 @@ export default function HomePage({ tours, loading }: HomePageProps) {
           )}
         </div>
       </section>
-
-      <section className="promise-grid" id="promise" aria-label="Our promise">
-        {promisePoints.map(({ icon: Icon, title, subtitle }) => (
-          <div key={title} className="promise-item">
-            <span className="promise-icon">
-              <Icon size={18} />
-            </span>
-            <div>
-              <strong>{title}</strong>
-              <small>{subtitle}</small>
-            </div>
-          </div>
-        ))}
-      </section>
-
     </main>
   );
 }

@@ -30,7 +30,7 @@ public class BookingEmailService {
             + "Safari: " + booking.getDeparture().getTour().getName() + "\n"
             + "Travel Date: " + booking.getDeparture().getStartDate() + "\n"
             + "Number of Guests: " + booking.getGuests() + "\n"
-            + addOnsSummary(booking)
+            + addonsSummary(booking)
             + "Total: " + booking.getCurrency() + " " + booking.getTotalAmount() + "\n"
             + "Booking Status: " + booking.getStatus() + "\n\n"
             + "WHAT HAPPENS NEXT?\n"
@@ -49,19 +49,19 @@ public class BookingEmailService {
                 booking.getCustomer().getEmail(), subject, body);
     }
 
-    private String addOnsSummary(Booking booking) {
+    private String addonsSummary(Booking booking) {
 
-        if (booking.getAddOns() == null || booking.getAddOns().isEmpty()) {
+        if (booking.getAddons() == null || booking.getAddons().isEmpty()) {
             return "";
         }
 
-        StringBuilder summary = new StringBuilder("Optional add-ons:\n");
+        StringBuilder summary = new StringBuilder("Selected extras:\n");
 
-        booking.getAddOns().forEach(experience -> summary
+        booking.getAddons().forEach(addon -> summary
                 .append("- ")
-                .append(experience.getName())
+                .append(addon.getName())
                 .append(" (USD ")
-                .append(experience.getPrice())
+                .append(addon.getPrice())
                 .append(" per booking)\n")
         );
 

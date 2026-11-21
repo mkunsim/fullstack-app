@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -34,7 +35,7 @@ public class BookingController {
     private final BookingRepository bookings;
     private final AppUserRepository users;
     private final DepartureRepository departures;
-    private final AddOnRepository addOns;
+    private final AddOnRepository addons;
     private final BookingEmailService emailService;
     private final OperatorEmailService operatorEmailService;
     private final PasswordlessAuthService authService;
@@ -44,7 +45,7 @@ public class BookingController {
             BookingRepository bookings,
             AppUserRepository users,
             DepartureRepository departures,
-            AddOnRepository addOns,
+            AddOnRepository addons,
             BookingEmailService emailService,
             OperatorEmailService operatorEmailService,
             PasswordlessAuthService authService,
@@ -53,7 +54,7 @@ public class BookingController {
         this.bookings = bookings;
         this.users = users;
         this.departures = departures;
-        this.addOns = addOns;
+        this.addons = addons;
         this.emailService = emailService;
         this.operatorEmailService = operatorEmailService;
         this.authService = authService;
@@ -61,7 +62,7 @@ public class BookingController {
     }
 
     public record AddOnView(
-            Long experienceId,
+            Long addonId,
             String name,
             String description,
             String preference,
@@ -78,7 +79,7 @@ public class BookingController {
             String currency,
             String status,
             String paymentStatus,
-            List<AddOnView> addOns
+            List<AddOnView> addons
     ) {}
 
     @PostMapping
@@ -114,43 +115,48 @@ public class BookingController {
             );
         }
 
-        // 2. Validate selected add-ons
+        // 2. Validate selected addons
 
-        List<Long> requestedIds = request.addOnIds() == null
+        List<Long> requestedIds = request.addonIds() == null
                 ? List.of()
-                : request.addOnIds();
+                : request.addonIds();
 
         Set<Long> uniqueIds = new HashSet<>(requestedIds);
 
         if (uniqueIds.size() != requestedIds.size()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "An add-on cannot be selected more than once."
+                    "An extra cannot be selected more than once."
             );
         }
 
-        List<AddOn> selectedAddOns = new ArrayList<>();
+        List<AddOn> selectedAddons = new ArrayList<>();
 
-        BigDecimal addOnTotal = BigDecimal.ZERO;
+        BigDecimal addonTotal = BigDecimal.ZERO;
 
-        for (Long addOnId : requestedIds) {
-
-            AddOn addOn = addOns.findById(addOnId)
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST,
-                            "Selected add-on does not exist."
-                    ));
-
-            if (!addOn.isAvailable()) {
+        for (Long addonId : requestedIds) {
+            if (addonId == null) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
-                        "Selected add-on is unavailable."
+                "Extra IDs cannot be null."
+                );
+            }
+            AddOn addon = addons.findById(addonId)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Selected extra does not exist."
+                    ));
+
+            if (!addon.isAvailable()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Selected extra is unavailable."
                 );
             }
 
-            selectedAddOns.add(addOn);
+            selectedAddons.add(addon);
 
-            addOnTotal = addOnTotal.add(addOn.getPrice());
+            addonTotal = addonTotal.add(addon.getPrice());
         }
 
         // 3. Find or create customer
@@ -182,7 +188,7 @@ public class BookingController {
 
         BigDecimal total = departure.getTour().getPricePerPerson()
                 .multiply(BigDecimal.valueOf(request.guests()))
-                .add(addOnTotal);
+                .add(addonTotal);
 
         // 5. Reserve departure capacity
 
@@ -199,9 +205,9 @@ public class BookingController {
                         .build()
         );
 
-        // 7. Attach selected add-ons
+        // 7. Attach selected addons
 
-        selectedAddOns.forEach(newBooking::addAddOn);
+        selectedAddons.forEach(newBooking::addAddOn);
 
         Booking booking = bookings.save(newBooking);
 
@@ -236,7 +242,7 @@ public class BookingController {
     @PostMapping("/{id}/cancel")
     @Transactional
     public BookingView cancelOwnBooking(
-            @PathVariable Long id,
+            @PathVariable @NonNull Long id,
             HttpServletRequest request
     ) {
         String email = authService.customerEmailFromRequest(request);
@@ -278,14 +284,14 @@ public class BookingController {
 
         Departure departure = booking.getDeparture();
 
-        List<AddOnView> experiences = booking.getAddOns()
+        List<AddOnView> addons = booking.getAddons()
                 .stream()
-                .map(addOn -> new AddOnView(
-                        addOn.getExperienceId(),
-                        addOn.getName(),
-                        addOn.getDescription(),
-                        addOn.getPreference(),
-                        addOn.getPrice()
+                .map(addon -> new AddOnView(
+                        addon.getId(),
+                        addon.getName(),
+                        addon.getDescription(),
+                        addon.getPreference(),
+                        addon.getPrice()
                 ))
                 .toList();
 
@@ -299,7 +305,7 @@ public class BookingController {
                 booking.getCurrency(),
                 booking.getStatus().name(),
                 booking.getPaymentStatus().name(),
-                experiences
+                addons
         );
     }
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Compass, LogIn, LogOut, Menu, X } from "lucide-react";
+import { ArrowLeft, Compass, LogIn, LogOut, Menu, MessageCircle, X } from "lucide-react";
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import * as api from "./api";
 import AccountPage from "./components/AccountPage";
@@ -14,6 +14,7 @@ import TourDetailsPage from "./components/TourDetailsPage";
 import type { AddOn, AdminBooking, Booking, CarBooking, SafariCar, Tour, User } from "./types";
 
 const SITE_ORIGIN = "https://safaritours.dpdns.org";
+const WHATSAPP_URL = `https://wa.me/254113098156?text=${encodeURIComponent("Hi, I'm interested in Wildpaths safaris.")}`;
 
 function setMetaTag(attribute: "name" | "property", key: string, content: string) {
   const selector = `meta[${attribute}="${key}"]`;
@@ -53,7 +54,7 @@ export default function App() {
   const [adminAddOnRows, setAdminAddOnRows] = useState<AddOn[]>([]);
   const [adminFleetRows, setAdminFleetRows] = useState<SafariCar[]>([]);
   const [adminCarRows, setAdminCarRows] = useState<CarBooking[]>([]);
-  const [addOnForm, setAddOnForm] = useState({ name: "", description: "", preference: "", price: 0, available: true });
+  const [addonForm, setAddOnForm] = useState({ name: "", description: "", preference: "", price: 0, available: true });
   const [editingAddOnId, setEditingAddOnId] = useState<number | null>(null);
   const [tourForm, setTourForm] = useState<AdminTourForm>({ name: "", description: "", destination: "", durationDays: 3, pricePerPerson: 990, imageUrl: "" });
   const [departureForm, setDepartureForm] = useState<AdminDepartureForm>({ tourId: 0, startDate: "", capacity: 10 });
@@ -78,16 +79,16 @@ export default function App() {
   async function loadAccount(account: User) {
     try {
       if (account.role === "ADMIN") {
-        const [bookingRows, tourRows, addOnRows, carRows, carBookingRows] = await Promise.all([
+        const [bookingRows, tourRows, addonRows, carRows, carBookingRows] = await Promise.all([
           api.adminBookings(),
           api.adminTours(),
-          api.adminAddOns(),
+          api.adminAddons(),
           api.adminCars(),
           api.adminCarBookings(),
         ]);
         setAdminRows(bookingRows);
         setAdminTourRows(tourRows);
-        setAdminAddOnRows(addOnRows);
+        setAdminAddOnRows(addonRows);
         setAdminFleetRows(carRows);
         setAdminCarRows(carBookingRows);
       } else {
@@ -250,9 +251,9 @@ export default function App() {
     }
   }
 
-  async function submitBooking(_tour: Tour, departureId: number, guests: number, customerName: string, customerEmail: string, addOnIds: number[]) {
+  async function submitBooking(_tour: Tour, departureId: number, guests: number, customerName: string, customerEmail: string, addonIds: number[]) {
     try {
-      const booking = await api.createBooking(departureId, guests, customerName, customerEmail, addOnIds);
+      const booking = await api.createBooking(departureId, guests, customerName, customerEmail, addonIds);
       setNotice(`Booking request #${booking.id} saved. Sign in later with an email code to view bookings.`);
       await refresh();
     } catch (reason) {
@@ -411,13 +412,28 @@ export default function App() {
   }
 
   const operatorAction = location.pathname === "/operator/booking-action";
+  const showBackButton = !operatorAction;
+  const historyIndex = window.history.state?.idx;
+  const canGoBack = typeof historyIndex === "number" && historyIndex > 0;
+
+  function goBack() {
+    if (canGoBack) navigate(-1);
+  }
 
   return (
     <div className="app">
       {operatorAction ? <Operator /> : <>
-        <header className="header">
+        <header className={showBackButton ? "header header-with-back" : "header"}>
           <div className="nav">
-            <Link className="brand brand-mark" to="/"><span className="brand-icon"><Compass /></span><span>WILDPATH <small>SAFARIS</small></span></Link>
+            <div className="header-brand-group">
+              {showBackButton && (
+                <button className="header-back-button" type="button" onClick={goBack} disabled={!canGoBack} aria-label="Back" title={canGoBack ? "Back" : "No previous page"}>
+                  <ArrowLeft size={18} />
+                  <span>Back</span>
+                </button>
+              )}
+              <Link className="brand brand-mark" to="/"><span className="brand-icon"><Compass /></span><span>WILDPATH <small>SAFARIS</small></span></Link>
+            </div>
             <button
               className="menu-toggle"
               type="button"
@@ -437,7 +453,7 @@ export default function App() {
               {user?.role === "ADMIN" && <NavLink to="/admin" onClick={() => setMenuOpen(false)}>Admin</NavLink>}
             </nav>
             <div className="header-actions">
-                  {user ? <><span className="signed-in">{user.fullName.split(" ")[0]}</span><button className="outline-btn" onClick={() => void signOut()}><LogOut size={15} /> Sign out</button></> :
+              {user ? <><span className="signed-in">{user.fullName.split(" ")[0]}</span><button className="outline-btn" onClick={() => void signOut()}><LogOut size={15} /> Sign out</button></> :
                 <button className="outline-btn" onClick={openSignIn}><LogIn size={15} /> Sign in</button>}
             </div>
           </div>
@@ -459,7 +475,7 @@ export default function App() {
           <Route path="/admin" element={<AdminPage
             user={user}
             tours={adminTourRows}
-            addOns={adminAddOnRows}
+            addons={adminAddOnRows}
             cars={adminFleetRows}
             tourBookings={adminRows}
             carBookings={adminCarRows}
@@ -476,7 +492,7 @@ export default function App() {
             onUpdateCar={(id, active, event) => void updateCar(id, active, event)}
             onUpdateBookingStatus={(id, status) => void updateTourBooking(id, status)}
             onUpdateCarBookingStatus={(id, status) => void updateVehicleBooking(id, status)}
-            addOnForm={addOnForm}
+            addonForm={addonForm}
             setAddOnForm={setAddOnForm}
             editingAddOnId={editingAddOnId}
             setEditingAddOnId={setEditingAddOnId}
@@ -484,7 +500,7 @@ export default function App() {
               if (!user) return;
               try {
                 await api.createAddOn(input);
-                setNotice("Add-on created.");
+                setNotice("Extra created.");
                 await loadAccount(user);
               } catch (reason) {
                 setNotice(reason instanceof Error ? reason.message : "Could not create add-on");
@@ -494,7 +510,7 @@ export default function App() {
               if (!user) return;
               try {
                 await api.updateAddOn(id, input);
-                setNotice("Add-on updated.");
+                setNotice("Extra updated.");
                 await loadAccount(user);
               } catch (reason) {
                 setNotice(reason instanceof Error ? reason.message : "Could not update add-on");
@@ -520,6 +536,18 @@ export default function App() {
           </section>
         </div>}
       </>}
+      {!operatorAction && (
+        <a
+          className="whatsapp-button"
+          href={WHATSAPP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Chat with Wildpath Safaris on WhatsApp"
+        >
+          <MessageCircle size={20} aria-hidden="true" />
+          <span>WhatsApp</span>
+        </a>
+      )}
       <ScenicFooter totalHits={totalHits} hitCountUnavailable={hitCountUnavailable} />
     </div>
   );

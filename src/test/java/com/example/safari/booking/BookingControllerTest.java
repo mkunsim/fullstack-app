@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -36,7 +37,7 @@ class BookingControllerTest {
     DepartureRepository departures;
 
     @Mock
-    AddOnRepository addOns;
+    AddOnRepository addons;
 
     @Mock
     BookingEmailService emailService;
@@ -62,7 +63,7 @@ class BookingControllerTest {
                 bookings,
                 users,
                 departures,
-                addOns,
+                addons,
                 emailService,
                 operatorEmailService,
                 authService,
@@ -98,6 +99,7 @@ class BookingControllerTest {
     // ==========================================
 
     @Test
+    @SuppressWarnings("null") // Mockito matchers return null as a sentinel during stubbing.
     void customerSubmissionCreatesPendingUnpaidBookingAndNotifiesBothParties()
             throws Exception {
 
@@ -107,7 +109,7 @@ class BookingControllerTest {
         when(users.findByEmailIgnoreCase("traveller@example.com"))
                 .thenReturn(Optional.of(customer));
 
-        when(bookings.save(any(Booking.class)))
+        when(bookings.save(ArgumentMatchers.<Booking>any()))
                 .thenAnswer(invocation ->
                         invocation.getArgument(0, Booking.class)
                 );
@@ -244,6 +246,7 @@ class BookingControllerTest {
     // ==========================================
 
     @Test
+    @SuppressWarnings("null") // Mockito matchers return null as a sentinel during stubbing.
     void selectedAvailableAddOnAddsOneTimePriceToBooking()
             throws Exception {
 
@@ -260,13 +263,13 @@ class BookingControllerTest {
         when(departures.findByIdForUpdate(7L))
                 .thenReturn(Optional.of(departure));
 
-        when(addOns.findById(41L))
+        when(addons.findById(41L))
                 .thenReturn(Optional.of(option));
 
         when(users.findByEmailIgnoreCase("traveller@example.com"))
                 .thenReturn(Optional.of(customer));
 
-        when(bookings.save(any(Booking.class)))
+        when(bookings.save(ArgumentMatchers.<Booking>any()))
                 .thenAnswer(invocation ->
                         invocation.getArgument(0, Booking.class)
                 );
@@ -286,16 +289,16 @@ class BookingControllerTest {
                 result.totalAmount()
         );
 
-        assertEquals(1, result.addOns().size());
+        assertEquals(1, result.addons().size());
 
         assertEquals(
                 "Local hospitality",
-                result.addOns().get(0).name()
+                result.addons().get(0).name()
         );
 
         assertEquals(
                 new BigDecimal("25.50"),
-                result.addOns().get(0).price()
+                result.addons().get(0).price()
         );
 
         ArgumentCaptor<Booking> captor =
@@ -305,14 +308,14 @@ class BookingControllerTest {
 
         Booking savedBooking = captor.getValue();
 
-        assertEquals(1, savedBooking.getAddOns().size());
+        assertEquals(1, savedBooking.getAddons().size());
 
         assertEquals(
                 "Local hospitality",
-                savedBooking.getAddOns().get(0).getName()
+                savedBooking.getAddons().get(0).getName()
         );
 
-        verify(addOns).findById(41L);
+        verify(addons).findById(41L);
     }
 
     // ==========================================
@@ -335,7 +338,7 @@ class BookingControllerTest {
         when(departures.findByIdForUpdate(7L))
                 .thenReturn(Optional.of(departure));
 
-        when(addOns.findById(42L))
+        when(addons.findById(42L))
                 .thenReturn(Optional.of(option));
 
         ResponseStatusException exception = assertThrows(
@@ -366,7 +369,7 @@ class BookingControllerTest {
         when(departures.findByIdForUpdate(7L))
                 .thenReturn(Optional.of(departure));
 
-        when(addOns.findById(99L))
+        when(addons.findById(99L))
                 .thenReturn(Optional.empty());
 
         ResponseStatusException exception = assertThrows(
@@ -412,6 +415,6 @@ class BookingControllerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
 
-        verifyNoInteractions(addOns, users, bookings);
+        verifyNoInteractions(addons, users, bookings);
     }
 }

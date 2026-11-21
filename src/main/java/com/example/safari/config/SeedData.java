@@ -33,7 +33,7 @@ public class SeedData {
             DepartureRepository departures,
             AppUserRepository users,
             CarRepository cars,
-            AddOnRepository addOns
+            AddOnRepository addons
     ) {
         return args -> {
 
@@ -57,8 +57,8 @@ public class SeedData {
                 }
             }
 
-            if (addOns.count() == 0) {
-                addOns.saveAll(Objects.requireNonNull(List.of(
+            if (addons.count() == 0) {
+                addons.saveAll(Objects.requireNonNull(List.of(
                         Objects.requireNonNull(AddOn.builder()
                                 .name("Meet a local person")
                                 .description("Meet and learn from a local person in the destination community.")
@@ -234,11 +234,12 @@ public class SeedData {
 
             if (!hasActiveDepartures) {
 
-                Departure departure = Departure.builder()
+                Departure departure = Objects.requireNonNull(
+                        Departure.builder()
                         .tour(tour)
                         .startDate(LocalDate.now().plusDays(30))
                         .capacity(10)
-                        .build();
+                        .build() );
 
                 departures.save(departure);
 

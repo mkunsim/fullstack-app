@@ -207,15 +207,15 @@ test("customer can book a tour, sign in, and use the mobile menu without initiat
   await expect(page.getByRole("button", { name: "Open navigation menu" })).toHaveAttribute("aria-expanded", "false");
 });
 
-test("customer can select optional special experiences and gets the correct total", async ({ page, request }) => {
+test("customer can select extras and gets the correct total", async ({ page, request }) => {
   const apiUrl = "http://127.0.0.1:18080/api";
   await signInAsAdmin(request, apiUrl);
-  const seededAddOnsResponse = await request.get(`${apiUrl}/admin/add-ons`);
-  expect(seededAddOnsResponse.ok()).toBeTruthy();
-  const seededAddOns = await seededAddOnsResponse.json() as Array<{ available: boolean }>;
-  expect(seededAddOns.some((addOn) => addOn.available)).toBeTruthy();
+  const seededAddonsResponse = await request.get(`${apiUrl}/admin/addons`);
+  expect(seededAddonsResponse.ok()).toBeTruthy();
+  const seededAddons = await seededAddonsResponse.json() as Array<{ available: boolean }>;
+  expect(seededAddons.some((addon) => addon.available)).toBeTruthy();
 
-  const addOnResponse = await request.post(`${apiUrl}/admin/add-ons`, {
+  const addonResponse = await request.post(`${apiUrl}/admin/addons`, {
     data: {
       name: `Local hospitality ${Date.now()}`,
       description: "Enjoy a welcome and hospitality experience with local hosts.",
@@ -224,8 +224,8 @@ test("customer can select optional special experiences and gets the correct tota
       available: true,
     },
   });
-  expect(addOnResponse.status()).toBe(201);
-  const createdAddOn = await addOnResponse.json() as { id: number; name: string };
+  expect(addonResponse.status()).toBe(201);
+  const createdAddOn = await addonResponse.json() as { id: number; name: string };
 
   const toursResponse = await request.get(`${apiUrl}/tours`);
   expect(toursResponse.ok()).toBeTruthy();
@@ -234,7 +234,7 @@ test("customer can select optional special experiences and gets the correct tota
     name: string;
     pricePerPerson: number;
     departures: Array<{ id: number; availableGuests: number }>;
-    addOns: Array<{
+    addons: Array<{
       id: number;
       name: string;
       price: number;
@@ -243,57 +243,56 @@ test("customer can select optional special experiences and gets the correct tota
   }>;
   const tour = tours.find((candidate) =>
     candidate.departures.some((departure) => departure.availableGuests >= 2)
-    && candidate.addOns.some((experience) => experience.id === createdAddOn.id && experience.available));
-  expect(tour, "a departure and a globally available AddOn are available").toBeTruthy();
-  if (!tour) throw new Error("No tour has a departure for two guests and the created AddOn.");
+    && candidate.addons.some((addon) => addon.id === createdAddOn.id && addon.available));
+  expect(tour, "a departure and a globally available extra is available").toBeTruthy();
+  if (!tour) throw new Error("No tour has a departure for two guests and the created extra.");
 
-  const option = tour.addOns.find((experience) =>
-    experience.id === createdAddOn.id && experience.available);
-  if (!option) throw new Error("The new AddOn was not returned in the tour catalog.");
+  const option = tour.addons.find((addon) => addon.id === createdAddOn.id && addon.available);
+  if (!option) throw new Error("The new extra was not returned in the tour catalog.");
   const departure = tour.departures.find((candidate) => candidate.availableGuests >= 2);
   if (!departure) throw new Error("The selected tour's departure is no longer available.");
   await page.goto(`/safari-tours/${tour.id}`);
   await expect(page.getByRole("heading", { name: `Request ${tour.name}` })).toBeVisible();
   await page.getByLabel("Departure date").selectOption(String(departure.id));
   await page.getByRole("spinbutton", { name: "Guests" }).fill("2");
-  await page.locator(".optional-trigger").click();
+  await page.locator(".addon-trigger").click();
   await expect(page.getByText("+$25.50", { exact: true })).toBeVisible();
   await page.getByRole("checkbox", { name: new RegExp(createdAddOn.name) }).check();
-  await expect(page.locator(".optional-footer-total")).toContainText("$25.50");
+  await expect(page.locator(".addon-footer-total")).toContainText("$25.50");
   await page.getByRole("button", { name: "Done" }).click();
-  await expect(page.locator(".optional-trigger")).toContainText("1 experience selected");
-  await expect(page.locator(".optional-trigger")).toContainText("Additional cost: $25.50");
+  await expect(page.locator(".addon-trigger")).toContainText("1 extra selected");
+  await expect(page.locator(".addon-trigger")).toContainText("Additional cost: $25.50");
   const expectedTotal = tour.pricePerPerson * 2 + option.price;
   await expect(page.locator(".booking-price-summary > strong")).toHaveText(`USD ${expectedTotal.toFixed(2)}`);
   await expect(page.locator(".booking-total")).toHaveCount(0);
 
   const bookingResponsePromise = page.waitForResponse((response) =>
     response.url().endsWith("/api/bookings") && response.request().method() === "POST");
-  await page.getByLabel("Full name").fill("Special Experience Traveller");
-  await page.getByLabel("Email").fill(`special-${Date.now()}@example.com`);
+  await page.getByLabel("Full name").fill("Extra Traveller");
+  await page.getByLabel("Email").fill(`extra-${Date.now()}@example.com`);
   await page.getByRole("button", { name: "Request booking" }).click();
   const bookingResponse = await bookingResponsePromise;
   expect(bookingResponse.status()).toBe(201);
   const booking = await bookingResponse.json() as {
     totalAmount: number;
-    addOns: Array<{ experienceId: number; name: string; price: number }>;
+    addons: Array<{ addonId: number; name: string; price: number }>;
   };
   expect(booking.totalAmount).toBe(expectedTotal);
-  expect(booking.addOns).toEqual([
+  expect(booking.addons).toEqual([
     expect.objectContaining({
-      experienceId: option.id,
+      addonId: option.id,
       name: createdAddOn.name,
       price: option.price,
     }),
   ]);
 
-  const deselectResponse = await request.put(`${apiUrl}/admin/add-ons/${option.id}/availability`, {
+  const deselectResponse = await request.put(`${apiUrl}/admin/addons/${option.id}/availability`, {
     data: { selected: false },
   });
   expect(deselectResponse.ok()).toBeTruthy();
   const deselectedOption = await deselectResponse.json() as { available: boolean };
   expect(deselectedOption.available).toBe(false);
-  const reselectResponse = await request.put(`${apiUrl}/admin/add-ons/${option.id}/availability`, {
+  const reselectResponse = await request.put(`${apiUrl}/admin/addons/${option.id}/availability`, {
     data: { selected: true },
   });
   expect(reselectResponse.ok()).toBeTruthy();

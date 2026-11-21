@@ -8,6 +8,7 @@ target/
 # Node
 node_modules/
 dist/
+*.tsbuildinfo
 frontend/playwright-report/
 frontend/test-results/
 .env

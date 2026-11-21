@@ -38,7 +38,7 @@ export interface AdminAddOnForm {
 interface AdminPageProps {
   user: User | null;
   tours: Tour[];
-  addOns: AddOn[];
+  addons: AddOn[];
   cars: SafariCar[];
   tourBookings: AdminBooking[];
   carBookings: CarBooking[];
@@ -55,7 +55,7 @@ interface AdminPageProps {
   onUpdateCar: (id: number, active: boolean, event: FormEvent<HTMLFormElement>) => void;
   onUpdateBookingStatus: (id: number, status: "CONFIRMED" | "CANCELLED" | "DECLINED") => void;
   onUpdateCarBookingStatus: (id: number, status: "CONFIRMED" | "CANCELLED" | "DECLINED") => void;
-  addOnForm: AdminAddOnForm;
+  addonForm: AdminAddOnForm;
   setAddOnForm: Dispatch<SetStateAction<AdminAddOnForm>>;
   editingAddOnId: number | null;
   setEditingAddOnId: Dispatch<SetStateAction<number | null>>;
@@ -66,11 +66,11 @@ interface AdminPageProps {
 
 export default function AdminPage(props: AdminPageProps) {
   const {
-    user, tours, addOns, cars, tourBookings, carBookings,
+    user, tours, addons, cars, tourBookings, carBookings,
     tourForm, setTourForm, departureForm, setDepartureForm,
     carForm, setCarForm, onCreateTour, onUpdateTour, onCreateDeparture, onCreateCar,
     onUpdateCar, onUpdateBookingStatus, onUpdateCarBookingStatus, notice,
-    addOnForm, setAddOnForm, editingAddOnId, setEditingAddOnId, onCreateAddOn, onUpdateAddOn,
+    addonForm, setAddOnForm, editingAddOnId, setEditingAddOnId, onCreateAddOn, onUpdateAddOn,
   } = props;
   const [editingTourId, setEditingTourId] = useState<number | null>(null);
   const [editingTourActive, setEditingTourActive] = useState(true);
@@ -117,13 +117,13 @@ export default function AdminPage(props: AdminPageProps) {
 
   function selectAddOn(id: number | null) {
     setEditingAddOnId(id);
-    const addOn = addOns.find((row) => row.id === id);
-    setAddOnForm(addOn ? {
-      name: addOn.name,
-      description: addOn.description,
-      preference: addOn.preference,
-      price: addOn.price,
-      available: addOn.available,
+    const addon = addons.find((row) => row.id === id);
+    setAddOnForm(addon ? {
+      name: addon.name,
+      description: addon.description,
+      preference: addon.preference,
+      price: addon.price,
+      available: addon.available,
     } : { name: "", description: "", preference: "", price: 0, available: true });
   }
 
@@ -139,8 +139,8 @@ export default function AdminPage(props: AdminPageProps) {
 
   function submitAddOnForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (editingAddOnId === null) onCreateAddOn(addOnForm);
-    else onUpdateAddOn(editingAddOnId, addOnForm);
+    if (editingAddOnId === null) onCreateAddOn(addonForm);
+    else onUpdateAddOn(editingAddOnId, addonForm);
   }
 
   if (!user || user.role !== "ADMIN") {
@@ -176,25 +176,25 @@ export default function AdminPage(props: AdminPageProps) {
           </form>
         </section>
         <section className="panel">
-          <h3>{editingAddOnId === null ? "Create optional experience" : "Edit optional experience"}</h3>
+          <h3>{editingAddOnId === null ? "Create extra" : "Edit extra"}</h3>
           <form className="stack-form" onSubmit={submitAddOnForm}>
-            <label>Edit existing experience<select value={editingAddOnId ?? ""} onChange={(event) => selectAddOn(event.target.value ? Number(event.target.value) : null)}>
-              <option value="">Create a new experience</option>
-              {addOns.map((addOn) => <option key={addOn.id} value={addOn.id}>{addOn.name}</option>)}
+            <label>Edit existing extra<select value={editingAddOnId ?? ""} onChange={(event) => selectAddOn(event.target.value ? Number(event.target.value) : null)}>
+              <option value="">Create a new extra</option>
+              {addons.map((addon) => <option key={addon.id} value={addon.id}>{addon.name}</option>)}
             </select></label>
-            <label>Name<input required maxLength={150} value={addOnForm.name} onChange={(event) => setAddOnForm({ ...addOnForm, name: event.target.value })} /></label>
-            <label>Description<textarea required maxLength={2000} value={addOnForm.description} onChange={(event) => setAddOnForm({ ...addOnForm, description: event.target.value })} /></label>
-            <label>Preference or service requirements<textarea required maxLength={1000} value={addOnForm.preference} onChange={(event) => setAddOnForm({ ...addOnForm, preference: event.target.value })} /></label>
-            <label>Price per booking (USD)<input required type="number" min={0} step="0.01" value={addOnForm.price} onChange={(event) => setAddOnForm({ ...addOnForm, price: Number(event.target.value) })} /></label>
-            {editingAddOnId !== null && <label className="checkbox-label"><input type="checkbox" checked={addOnForm.available} onChange={(event) => setAddOnForm({ ...addOnForm, available: event.target.checked })} /> Available to customers</label>}
-            <button className="primary-btn" type="submit">{editingAddOnId === null ? "Create experience" : "Save experience"}</button>
+            <label>Name<input required maxLength={150} value={addonForm.name} onChange={(event) => setAddOnForm({ ...addonForm, name: event.target.value })} /></label>
+            <label>Description<textarea required maxLength={2000} value={addonForm.description} onChange={(event) => setAddOnForm({ ...addonForm, description: event.target.value })} /></label>
+            <label>Preference or service requirements<textarea required maxLength={1000} value={addonForm.preference} onChange={(event) => setAddOnForm({ ...addonForm, preference: event.target.value })} /></label>
+            <label>Price per booking (USD)<input required type="number" min={0} step="0.01" value={addonForm.price} onChange={(event) => setAddOnForm({ ...addonForm, price: Number(event.target.value) })} /></label>
+            {editingAddOnId !== null && <label className="checkbox-label"><input type="checkbox" checked={addonForm.available} onChange={(event) => setAddOnForm({ ...addonForm, available: event.target.checked })} /> Available to customers</label>}
+            <button className="primary-btn" type="submit">{editingAddOnId === null ? "Create extra" : "Save extra"}</button>
           </form>
-          {addOns.length > 0 && <div className="table-scroll">
-            <table><thead><tr><th>Experience</th><th>Price</th><th>Availability</th></tr></thead>
-              <tbody>{addOns.map((addOn) => <tr key={addOn.id}>
-                <td>{addOn.name}<small>{addOn.description}</small></td>
-                <td>USD {addOn.price.toFixed(2)}</td>
-                <td>{addOn.available ? "Available" : "Hidden"} <button type="button" className="text-link" onClick={() => selectAddOn(addOn.id)}>Edit</button></td>
+          {addons.length > 0 && <div className="table-scroll">
+            <table><thead><tr><th>Extra</th><th>Price</th><th>Availability</th></tr></thead>
+              <tbody>{addons.map((addon) => <tr key={addon.id}>
+                <td>{addon.name}<small>{addon.description}</small></td>
+                <td>USD {addon.price.toFixed(2)}</td>
+                <td>{addon.available ? "Available" : "Hidden"} <button type="button" className="text-link" onClick={() => selectAddOn(addon.id)}>Edit</button></td>
               </tr>)}</tbody>
             </table>
           </div>}
@@ -240,7 +240,7 @@ export default function AdminPage(props: AdminPageProps) {
         <section className="panel table-panel">
           <h3>Experience bookings</h3>
           {tourBookings.length ? <div className="table-scroll"><table><thead><tr><th>Experience</th><th>Customer</th><th>Departure</th><th>Guests</th><th>Total</th><th>Status</th></tr></thead>
-            <tbody>{tourBookings.map((booking) => <tr key={booking.id}>            <td>{booking.tourName}<small>{booking.destination}</small>{booking.addOns?.map((experience) => <small key={experience.experienceId}>Add-on: {experience.name} (USD {experience.price.toFixed(2)} per booking)</small>)}</td><td>{booking.customerName}<small>{booking.customerEmail}</small></td><td>{new Date(`${booking.startDate}T00:00:00`).toLocaleDateString()}</td><td>{booking.guests}</td><td>{booking.currency} {booking.totalAmount.toLocaleString()}</td><td>{booking.status}{booking.status === "PENDING" && <div className="admin-booking-actions"><button className="text-link" onClick={() => onUpdateBookingStatus(booking.id, "CONFIRMED")}>Confirm</button><button className="text-link" onClick={() => onUpdateBookingStatus(booking.id, "DECLINED")}>Decline</button><button className="text-link" onClick={() => onUpdateBookingStatus(booking.id, "CANCELLED")}>Cancel</button></div>}</td></tr>)}</tbody>
+            <tbody>{tourBookings.map((booking) => <tr key={booking.id}>            <td>{booking.tourName}<small>{booking.destination}</small>{booking.addons?.map((addon) => <small key={addon.addonId}>Extra: {addon.name} (USD {addon.price.toFixed(2)} per booking)</small>)}</td><td>{booking.customerName}<small>{booking.customerEmail}</small></td><td>{new Date(`${booking.startDate}T00:00:00`).toLocaleDateString()}</td><td>{booking.guests}</td><td>{booking.currency} {booking.totalAmount.toLocaleString()}</td><td>{booking.status}{booking.status === "PENDING" && <div className="admin-booking-actions"><button className="text-link" onClick={() => onUpdateBookingStatus(booking.id, "CONFIRMED")}>Confirm</button><button className="text-link" onClick={() => onUpdateBookingStatus(booking.id, "DECLINED")}>Decline</button><button className="text-link" onClick={() => onUpdateBookingStatus(booking.id, "CANCELLED")}>Cancel</button></div>}</td></tr>)}</tbody>
           </table></div> : <p>No experience bookings yet.</p>}
         </section>
         <section className="panel table-panel">

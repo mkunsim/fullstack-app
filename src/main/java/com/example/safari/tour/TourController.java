@@ -13,11 +13,11 @@ import java.util.List;
 @RequestMapping("/api/tours")
 public class TourController {
     private final TourRepository tours;
-    private final AddOnRepository addOns;
+    private final AddOnRepository addons;
 
-    public TourController(TourRepository tours, AddOnRepository addOns) {
+    public TourController(TourRepository tours, AddOnRepository addons) {
         this.tours = tours;
-        this.addOns = addOns;
+        this.addons = addons;
     }
 
     public record AddOnView(
@@ -38,15 +38,15 @@ public class TourController {
             String imageUrl,
             boolean active,
             List<Departure> departures,
-            List<AddOnView> addOns
+            List<AddOnView> addons
     ) {}
 
     @GetMapping
     @Transactional(readOnly = true)
     public List<TourView> all() {
-        List<AddOn> availableAddOns = addOns.findByAvailableTrueOrderByIdAsc();
+        List<AddOn> availableAddons = addons.findByAvailableTrueOrderByIdAsc();
         return tours.findByActiveTrueOrderByIdAsc().stream()
-                .map(tour -> view(tour, availableAddOns))
+                .map(tour -> view(tour, availableAddons))
                 .toList();
     }
 
@@ -56,13 +56,13 @@ public class TourController {
         if (id == null || id <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A valid tour ID is required.");
         }
-        List<AddOn> availableAddOns = addOns.findByAvailableTrueOrderByIdAsc();
-        return tours.findById(id).filter(Tour::isActive)
-            .map(tour -> view(tour, availableAddOns))
+        List<AddOn> availableAddons = addons.findByAvailableTrueOrderByIdAsc();
+        return tours.findById(id).filter(tour -> tour.isActive())
+            .map(tour -> view(tour, availableAddons))
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tour not found"));
     }
 
-    private TourView view(Tour tour, List<AddOn> availableAddOns) {
+    private TourView view(Tour tour, List<AddOn> availableAddons) {
         return new TourView(
                 tour.getId(),
                 tour.getName(),
@@ -73,14 +73,14 @@ public class TourController {
                 tour.getImageUrl(),
                 tour.isActive(),
                 tour.getDepartures(),
-                availableAddOns.stream()
-                        .map(addOn -> new AddOnView(
-                                addOn.getId(),
-                                addOn.getName(),
-                                addOn.getDescription(),
-                                addOn.getPreference(),
-                                addOn.getPrice(),
-                                addOn.isAvailable()
+                availableAddons.stream()
+                        .map(addon -> new AddOnView(
+                                addon.getId(),
+                                addon.getName(),
+                                addon.getDescription(),
+                                addon.getPreference(),
+                                addon.getPrice(),
+                                addon.isAvailable()
                         ))
                         .toList()
         );

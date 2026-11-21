@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -35,7 +36,8 @@ class PaymentCompletionServiceTest {
     PaymentProvider paymentProvider;
 
     private PaymentCompletionService service;
-    private final Booking booking = createBooking();
+    @NonNull
+    private final Booking booking = Objects.requireNonNull(createBooking());
 
     @BeforeEach
     void setUp() {
@@ -105,7 +107,7 @@ class PaymentCompletionServiceTest {
                 .fullName("Guest")
                 .role(Role.CUSTOMER)
                 .build();
-        CarBooking carBooking = CarBooking.builder()
+        CarBooking carBooking = Objects.requireNonNull(CarBooking.builder()
                 .id(22L)
                 .customer(customer)
                 .currency("USD")
@@ -115,7 +117,7 @@ class PaymentCompletionServiceTest {
                 .paymentCurrency("KES")
                 .paymentAmountKes(new BigDecimal("19575.00"))
                 .paymentReference("car-ref-1")
-                .build();
+                .build());
         PaymentProvider.PaymentVerification verification =
                 new PaymentProvider.PaymentVerification(
                         "car-ref-1", "success", 1957500L, "KES", 22L, "car");

@@ -25,17 +25,17 @@ export type AddOn = {
   price: number;
   available: boolean;
 }
-export type SelectedAddOn = {
-  experienceId: number;
+export type BookingAddOn = {
+  addonId: number;
   name: string;
   description: string;
   preference: string;
   price: number;
 }
-export type Tour = {id:number;name:string;description:string;destination:string;durationDays:number;pricePerPerson:number;imageUrl:string;departures:Departure[];addOns:AddOn[];active?:boolean}
+export type Tour = {id:number;name:string;description:string;destination:string;durationDays:number;pricePerPerson:number;imageUrl:string;departures:Departure[];addons:AddOn[];active?:boolean}
 export type User = {email:string;fullName:string;role:'CUSTOMER'|'ADMIN'}
 export type BookingStatus = "PENDING" | "CONFIRMED" | "DECLINED" | "CANCELLED"
-export type Booking = {id:number;tourName:string;destination:string;startDate:string;guests:number;totalAmount:number;currency:string;status:BookingStatus;paymentStatus:string;addOns:SelectedAddOn[]}
+export type Booking = {id:number;tourName:string;destination:string;startDate:string;guests:number;totalAmount:number;currency:string;status:BookingStatus;paymentStatus:string;addons:BookingAddOn[]}
 export type AdminBooking = Booking & {customerName:string;customerEmail:string}
 
 export type SafariCar = {

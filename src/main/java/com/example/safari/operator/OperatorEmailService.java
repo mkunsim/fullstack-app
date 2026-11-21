@@ -74,7 +74,7 @@ public class OperatorEmailService {
                     + booking.getCustomer().getFullName() + "\n"
                     + "Customer email: "
                     + booking.getCustomer().getEmail() + "\n\n"
-                    + addOnsSummary(booking)
+                    + addonsSummary(booking)
                     + "Booking total: " + booking.getCurrency() + " "
                     + booking.getTotalAmount() + "\n\n"
                     + "Please use the following links to respond:\n\n"
@@ -95,14 +95,14 @@ public class OperatorEmailService {
         log.info("Operator availability notification queued for booking {}", booking.getId());
     }
 
-    private String addOnsSummary(Booking booking) {
-        if (booking.getAddOns().isEmpty()) return "";
-        StringBuilder summary = new StringBuilder("Optional special experiences:\n");
-        booking.getAddOns().forEach(experience -> summary
+    private String addonsSummary(Booking booking) {
+        if (booking.getAddons().isEmpty()) return "";
+        StringBuilder summary = new StringBuilder("Selected extras:\n");
+        booking.getAddons().forEach(addon -> summary
                 .append("- ")
-                .append(experience.getName())
+                .append(addon.getName())
                 .append(" (USD ")
-                .append(experience.getPrice())
+                .append(addon.getPrice())
                 .append(" per booking)\n"));
         return summary.append('\n').toString();
     }

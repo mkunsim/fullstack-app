@@ -21,7 +21,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "add_ons")
+@Table(name = "addons")
 @Getter
 @Setter
 @ToString
@@ -39,7 +39,7 @@ public class AddOn {
     @Column(nullable = false, length = 2000)
     private String description;
 
-    @Column(nullable = false, length = 2000)
+    @Column(nullable = false)
     private boolean available;
 
     @Column(name = "preference", nullable = false, length = 1000)
@@ -83,10 +83,6 @@ public class AddOn {
         );
     }
 
-    public Long getExperienceId() {
-        return id;
-    }
-
     public void update(
             String name,
             String description,
@@ -97,25 +93,25 @@ public class AddOn {
 
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException(
-                    "Special experience name is required."
+                    "Add-on name is required."
             );
         }
 
         if (description == null || description.isBlank()) {
             throw new IllegalArgumentException(
-                    "Special experience description is required."
+                    "Add-on description is required."
             );
         }
 
         if (preference == null) {
             throw new IllegalArgumentException(
-                    "Special experience service requirements are required."
+                    "Add-on service requirements are required."
             );
         }
 
         if (price == null || price.signum() < 0) {
             throw new IllegalArgumentException(
-                    "Special experience price cannot be negative."
+                    "Add-on price cannot be negative."
             );
         }
 
@@ -132,7 +128,7 @@ public class AddOn {
 
         if (price == null || price.signum() < 0) {
             throw new IllegalArgumentException(
-                    "Special experience price cannot be negative."
+                    "Add-on price cannot be negative."
             );
         }
     }

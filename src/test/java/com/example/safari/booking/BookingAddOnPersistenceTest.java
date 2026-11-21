@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class BookingAddOnPersistenceTest {
-
     @Autowired
     private EntityManager entityManager;
 
@@ -26,7 +26,7 @@ class BookingAddOnPersistenceTest {
     private BookingRepository bookings;
 
     @Test
-    void persistsSelectedAddOnSnapshotOnBooking() {
+    void persistsBookingAddOnRelationshipOnBooking() {
         Tour tour = new Tour(
                 "Serengeti",
                 "Safari",
@@ -71,13 +71,14 @@ class BookingAddOnPersistenceTest {
         booking.addAddOn(selectedAddOn);
         entityManager.persist(booking);
         entityManager.flush();
+        Long bookingId = Objects.requireNonNull(booking.getId());
         entityManager.clear();
 
-        Booking persistedBooking = bookings.findById(booking.getId()).orElseThrow();
+        Booking persistedBooking = bookings.findById(bookingId).orElseThrow();
 
-        assertEquals(1, persistedBooking.getAddOns().size());
-        assertEquals(selectedAddOn.getId(), persistedBooking.getAddOns().get(0).getExperienceId());
-        assertEquals("Local hospitality", persistedBooking.getAddOns().get(0).getName());
-        assertEquals(new BigDecimal("25.50"), persistedBooking.getAddOns().get(0).getPrice());
+        assertEquals(1, persistedBooking.getAddons().size());
+        assertEquals(selectedAddOn.getId(), persistedBooking.getAddons().get(0).getId());
+        assertEquals("Local hospitality", persistedBooking.getAddons().get(0).getName());
+        assertEquals(new BigDecimal("25.50"), persistedBooking.getAddons().get(0).getPrice());
     }
 }

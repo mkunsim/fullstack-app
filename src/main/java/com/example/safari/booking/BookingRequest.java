@@ -8,7 +8,7 @@ public record BookingRequest(
         @Min(1) @Max(20) int guests,
         @NotBlank @Size(max=120) String customerName,
         @NotBlank @Email @Size(max=254) String customerEmail,
-        @Size(max = 20) List<@NotNull @Positive Long> addOnIds
+        @Size(max = 20) List<@NotNull @Positive Long> addonIds
 ) {
     public BookingRequest(
             Long departureId,

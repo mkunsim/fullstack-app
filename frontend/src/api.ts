@@ -49,11 +49,11 @@ export const createBooking = (
   guests: number,
   customerName: string,
   customerEmail: string,
-  addOnIds: number[],
+  addonIds: number[],
 ) => request(`${API}/bookings`, {
   method: "POST",
   headers: headers(true),
-  body: JSON.stringify({ departureId, guests, customerName, customerEmail, addOnIds }),
+  body: JSON.stringify({ departureId, guests, customerName, customerEmail, addonIds }),
 }).then((r) => read<Booking>(r));
 
 export const myBookings = () => request(`${API}/bookings/mine`).then((r) => read<Booking[]>(r));
@@ -63,7 +63,7 @@ export const cancelMyBooking = (id: number) => request(`${API}/bookings/${id}/ca
 
 export const adminBookings = () => request(`${API}/admin/bookings`).then((r) => read<AdminBooking[]>(r));
 export const adminTours = () => request(`${API}/admin/tours`).then((r) => read<Tour[]>(r));
-type TourInput = Omit<Tour, "id" | "departures" | "addOns">;
+type TourInput = Omit<Tour, "id" | "departures" | "addons">;
 export const createTour = (input: TourInput) => request(`${API}/admin/tours`, {
   method: "POST",
   headers: headers(true),
@@ -85,14 +85,14 @@ export const addDeparture = (tourId: number, startDate: string, capacity: number
   body: JSON.stringify({ startDate, capacity }),
 }).then((r) => read<unknown>(r));
 
-export const adminAddOns = () => request(`${API}/admin/add-ons`).then((r) => read<AddOn[]>(r));
+export const adminAddons = () => request(`${API}/admin/addons`).then((r) => read<AddOn[]>(r));
 export type AddOnInput = Omit<AddOn, "id">;
-export const createAddOn = (input: AddOnInput) => request(`${API}/admin/add-ons`, {
+export const createAddOn = (input: AddOnInput) => request(`${API}/admin/addons`, {
   method: "POST",
   headers: headers(true),
   body: JSON.stringify(input),
 }).then((r) => read<AddOn>(r));
-export const updateAddOn = (id: number, input: AddOnInput) => request(`${API}/admin/add-ons/${id}`, {
+export const updateAddOn = (id: number, input: AddOnInput) => request(`${API}/admin/addons/${id}`, {
   method: "PUT",
   headers: headers(true),
   body: JSON.stringify(input),
@@ -170,6 +170,14 @@ export interface ReviewRequest {
   rating: number;
   text: string;
 }
+
+export interface ReviewSummary {
+  averageRating: number;
+  reviewCount: number;
+}
+
+export const getReviewSummary = () => request(`${API}/reviews/summary`)
+  .then((r) => read<ReviewSummary>(r));
 
 export const submitReview = (input: ReviewRequest) => request(`${API}/reviews`, {
   method: "POST",

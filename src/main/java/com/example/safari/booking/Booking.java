@@ -99,16 +99,14 @@ public class Booking {
     private String paymentCheckoutUrl;
 
     @Builder.Default
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-            name = "booking_special_experiences",
-            joinColumns = @JoinColumn(
-                    name = "booking_id",
-                    foreignKey = @ForeignKey(name = "fk_booking_special_experiences_booking_id")
-            )
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "booking_addons",
+            joinColumns = @JoinColumn(name = "booking_id"),
+            inverseJoinColumns = @JoinColumn(name = "addon_id")
     )
     @OrderColumn(name = "selection_order")
-    private List<BookedAddOn> addOns = new ArrayList<>();
+    private List<AddOn> addons = new ArrayList<>();
 
     @Builder.Default
     @Column(length = 3)
@@ -137,7 +135,7 @@ public class Booking {
         this.customer = customer;
         this.departure = departure;
         this.guests = guests;
-        this.addOns = new ArrayList<>();
+        this.addons = new ArrayList<>();
         this.totalAmount = totalAmount.setScale(2, RoundingMode.HALF_UP);
         this.currency = "USD";
         this.status = BookingStatus.PENDING;
@@ -185,54 +183,8 @@ public class Booking {
     public void setPaymentCheckoutUrl(String paymentCheckoutUrl) { this.paymentCheckoutUrl = paymentCheckoutUrl; }
     public void setPaymentCurrency(String paymentCurrency) { this.paymentCurrency = paymentCurrency; }
 
-    public void addAddOn(AddOn experience) {
-        addOns.add(new BookedAddOn(
-                experience.getId(),
-                experience.getName(),
-                experience.getDescription(),
-                experience.getPreference(),
-                experience.getPrice(),
-                experience.isAvailable()
-        ));
-    }
-
-    @Embeddable
-    @Getter
-    @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class BookedAddOn {
-        @Column(name = "experience_id", nullable = false)
-        private Long experienceId;
-
-        @Column(name = "name", nullable = false, length = 120)
-        private String name;
-
-        @Column(name = "description", nullable = false, length = 2000)
-        private String description;
-
-        @Column(name = "preference", nullable = false, length = 1000)
-        private String preference;
-
-        @Column(name = "price", nullable = false, precision = 10, scale = 2)
-        private BigDecimal price;
-
-        @Column(name = "available", nullable = false)
-        private boolean available;
-
-        private BookedAddOn(
-                Long experienceId,
-                String name,
-                String description,
-                String preference,
-                BigDecimal price,
-                boolean available
-        ) {
-            this.experienceId = experienceId;
-            this.name = name;
-            this.description = description;
-            this.preference = preference;
-            this.price = price;
-            this.available = available;
-        }
+    public void addAddOn(AddOn addon) {
+        addons.add(addon);
     }
 
     public void setPaymentReferenceSafe(String ref) {

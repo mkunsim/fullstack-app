@@ -4,6 +4,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
+import java.util.Objects;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +27,7 @@ public class HitCountController {
         this.pageHits = pageHits;
     }
 
-@PostMapping
+    @PostMapping
     @Transactional
     @ResponseStatus(HttpStatus.OK)
     public HitCountResponse recordHit(@Valid @RequestBody HitRequest hit) {
@@ -35,11 +38,17 @@ public class HitCountController {
                 .orElseThrow(() -> new IllegalStateException("The site hit counter row is missing."));
         counter.increment();
 
-        pageHits.findById(hit.pagePath())
-                .ifPresentOrElse(
-                        SitePageHit::recordVisit,
-                        () -> pageHits.save(new SitePageHit(hit.pagePath()))
-                );
+        if (hit == null || hit.pagePath() == null || hit.pagePath().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "pagePath is required.");
+        }
+
+        String pagePath = Objects.requireNonNull(hit.pagePath());
+
+        pageHits.findById(pagePath)
+        .ifPresentOrElse(
+                pageHit -> pageHit.recordVisit(),
+                () -> pageHits.save(new SitePageHit(pagePath))
+        );
 
         return new HitCountResponse(counter.getTotalCount());
     }

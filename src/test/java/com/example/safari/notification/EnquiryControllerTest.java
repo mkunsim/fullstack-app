@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,10 +35,12 @@ class EnquiryControllerTest {
         );
 
         var response = controller.submit(request);
+        EnquiryController.EnquiryResponse responseBody =
+                Objects.requireNonNull(response.getBody());
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         assertEquals("Enquiry received. No booking has been created.",
-                response.getBody().message());
+                responseBody.message());
         ArgumentCaptor<String> dedupeKey = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> subject = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> body = ArgumentCaptor.forClass(String.class);

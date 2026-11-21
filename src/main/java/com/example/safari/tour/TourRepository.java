@@ -10,6 +10,5 @@ public interface TourRepository extends JpaRepository<Tour, Long> {
     @EntityGraph(attributePaths = {"departures"})
     List<Tour> findByActiveTrueOrderByIdAsc();
 
-    @EntityGraph(attributePaths = {"addOns"})
     List<Tour> findAllByOrderByIdAsc();
 }

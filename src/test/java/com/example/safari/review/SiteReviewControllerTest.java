@@ -17,6 +17,7 @@ class SiteReviewControllerTest {
     private SiteReviewRepository reviews;
 
     @Test
+    @SuppressWarnings("null") // Mockito matchers use null as a stubbing sentinel.
     void storesRatingAndTrimmedReviewText() {
         SiteReviewController controller = new SiteReviewController(reviews);
         when(reviews.save(any(SiteReview.class)))

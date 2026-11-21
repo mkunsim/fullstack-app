@@ -15,6 +15,7 @@ import jakarta.validation.constraints.*;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,20 +32,20 @@ public class AdminController {
     private final DepartureRepository departures;
     private final BookingRepository bookings;
     private final BookingService bookingService;
-    private final AddOnRepository addOns;
+    private final AddOnRepository addons;
 
     public AdminController(
             TourRepository tours,
             DepartureRepository departures,
             BookingRepository bookings,
             BookingService bookingService,
-            AddOnRepository addOns
+            AddOnRepository addons
     ) {
         this.tours = tours;
         this.departures = departures;
         this.bookings = bookings;
         this.bookingService = bookingService;
-        this.addOns = addOns;
+        this.addons = addons;
     }
 
     // ==========================================
@@ -90,7 +91,7 @@ public class AdminController {
             String currency,
             String status,
             String paymentStatus,
-            List<BookingController.AddOnView> addOns
+            List<BookingController.AddOnView> addons
     ) {}
 
     public record BookingStatusRequest(
@@ -160,19 +161,19 @@ public class AdminController {
     // GLOBAL ADD-ON MANAGEMENT
     // ==========================================
 
-    @GetMapping("/add-ons")
+    @GetMapping("/addons")
     @Transactional(readOnly = true)
-    public List<AddOn> allAddOns() {
-        return addOns.findAllByOrderByIdAsc();
+    public List<AddOn> allAddons() {
+        return addons.findAllByOrderByIdAsc();
     }
 
-    @PostMapping("/add-ons")
+    @PostMapping("/addons")
     @ResponseStatus(HttpStatus.CREATED)
     public AddOn createAddOn(
             @Valid @RequestBody AddOnInput request
     ) {
 
-        AddOn addOn = Objects.requireNonNull(
+        AddOn addon = Objects.requireNonNull(
                 AddOn.builder()
                         .name(request.name())
                         .description(request.description())
@@ -182,45 +183,45 @@ public class AdminController {
                         .build()
         );
 
-        return addOns.save(addOn);
+        return addons.save(addon);
     }
 
-    @PutMapping("/add-ons/{id}")
+    @PutMapping("/addons/{id}")
     public AddOn updateAddOn(
-            @PathVariable Long id,
+            @PathVariable @NonNull Long id,
             @Valid @RequestBody AddOnInput request
     ) {
 
-        AddOn addOn = addOns.findById(id)
+        AddOn addon = addons.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Add-on not found."
+                        "Extra not found."
                 ));
 
-        addOn.setName(request.name());
-        addOn.setDescription(request.description());
-        addOn.setPreference(request.preference());
-        addOn.setPrice(request.price());
-        addOn.setAvailable(request.available());
+        addon.setName(request.name());
+        addon.setDescription(request.description());
+        addon.setPreference(request.preference());
+        addon.setPrice(request.price());
+        addon.setAvailable(request.available());
 
-        return addOns.save(addOn);
+        return addons.save(addon);
     }
 
-    @PutMapping("/add-ons/{id}/availability")
+    @PutMapping("/addons/{id}/availability")
     public AddOn updateAddOnAvailability(
-            @PathVariable Long id,
+            @PathVariable @NonNull Long id,
             @Valid @RequestBody AddOnSelection request
     ) {
 
-        AddOn addOn = addOns.findById(id)
+        AddOn addon = addons.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Add-on not found."
+                        "Extra not found."
                 ));
 
-        addOn.setAvailable(request.selected());
+        addon.setAvailable(request.selected());
 
-        return addOns.save(addOn);
+        return addons.save(addon);
     }
 
     // ==========================================
@@ -331,13 +332,13 @@ public class AdminController {
                 booking.getCurrency(),
                 booking.getStatus().name(),
                 booking.getPaymentStatus().name(),
-                booking.getAddOns().stream()
-                        .map(addOn -> new BookingController.AddOnView(
-                                addOn.getExperienceId(),
-                                addOn.getName(),
-                                addOn.getDescription(),
-                                addOn.getPreference(),
-                                addOn.getPrice()
+                booking.getAddons().stream()
+                        .map(addon -> new BookingController.AddOnView(
+                                addon.getId(),
+                                addon.getName(),
+                                addon.getDescription(),
+                                addon.getPreference(),
+                                addon.getPrice()
                         ))
                         .toList()
         );

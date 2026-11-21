@@ -1,6 +1,6 @@
 import { ArrowRight, CalendarDays, Compass } from "lucide-react";
-import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import CardItem from "./CardItem";
 import { filterCatalog, paginate, type CatalogSort } from "../catalogUtils.mjs";
 import type { Tour } from "../types";
@@ -27,8 +27,9 @@ export default function SafariToursPage({
   dismissNotice,
 }: SafariToursPageProps) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState("");
-  const [destination, setDestination] = useState("");
+  const [destination, setDestination] = useState(() => searchParams.get("destination") ?? "");
   const [sort, setSort] = useState<CatalogSort>("recommended");
   const [page, setPage] = useState(1);
   const pageSize = 6;
@@ -38,6 +39,20 @@ export default function SafariToursPage({
   const pageCount = Math.max(1, Math.ceil(filteredTours.length / pageSize));
   const currentPage = Math.min(page, pageCount);
   const visibleTours = paginate(filteredTours, currentPage, pageSize);
+
+  function selectDestination(value: string) {
+    setDestination(value);
+    setPage(1);
+    const nextSearchParams = new URLSearchParams(searchParams);
+    if (value) nextSearchParams.set("destination", value);
+    else nextSearchParams.delete("destination");
+    setSearchParams(nextSearchParams, { replace: true });
+  }
+
+  useEffect(() => {
+    setDestination(searchParams.get("destination") ?? "");
+    setPage(1);
+  }, [searchParams]);
 
   return (
     <main className="catalog page-catalog">
@@ -49,7 +64,7 @@ export default function SafariToursPage({
       {error && <div className="notice error" role="alert">{error}. Check that the backend and PostgreSQL are running.</div>}
       {!loading && tours.length > 0 && <div className="catalog-controls">
         <label>Search experiences<input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Name, destination, or detail" /></label>
-        <label>Destination<select value={destination} onChange={(event) => { setDestination(event.target.value); setPage(1); }}><option value="">All destinations</option>{destinations.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
+        <label>Destination<select value={destination} onChange={(event) => selectDestination(event.target.value)}><option value="">All destinations</option>{destinations.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
         <label>Sort by<select value={sort} onChange={(event) => { setSort(event.target.value as CatalogSort); setPage(1); }}><option value="recommended">Recommended</option><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option><option value="name">Name</option></select></label>
         <span className="catalog-count" role="status">{filteredTours.length} experience{filteredTours.length === 1 ? "" : "s"}</span>
       </div>}
