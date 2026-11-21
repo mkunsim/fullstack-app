@@ -42,13 +42,40 @@ app.use((req, res, next) => {
   const pathname = req.path.toLowerCase();
 
   const blockedPatterns = [
+    // Repository metadata and environment files.
     /(?:^|\/)server\.js(?:\.map)?$/,
-    /(?:^|\/)\.env(?:\.[^/]*)?$/,
-    /(?:^|\/)\.git(?:\/|$)/,
-    /(?:^|\/)package(?:-lock)?\.json$/,
-    /(?:^|\/)config\.js$/,
+    /(?:^|\/)\.env[^/]*$/,
+    /(?:^|\/)(?:\.git|\.svn|\.hg|\.github|\.semaphore|\.buildkite)(?:\/|$)/,
+    /(?:^|\/)(?:\.gitignore|\.gitattributes|\.gitmodules|\.hgignore)$/,
+    /(?:^|\/)env(?:[-_.][^/]*)?\.js$/,
+
+    // Credentials and filenames that indicate secret material.
+    /(?:^|\/)(?:google-services|google-api-private-key|oauth-credentials|keycloak|secret|secrets|credentials?|service[-_]?account(?:[-_]?credentials?|[-_]?key)?|serviceaccountkey|firebase-adminsdk|gcloud-service-key|gcp-(?:vertex|credentials|service-account)|google-(?:credentials|vertex|service-account)|vertex(?:-ai)?|token|auth|public\/auth|ws-config)\.(?:json|ya?ml|toml|ini|properties|xml|env)$/,
+    /(?:^|\/)[^/]*(?:secret|credential|token|private[-_]?key)[^/]*\.(?:json|ya?ml|toml|ini|properties|xml|php|rb)(?:\.(?:bak|old|orig|save|dist|txt))?$/,
+    /(?:^|\/)(?:\.composer-auth|sftp|sftp-config|sendgrid)\.(?:json|env)$/,
+
+    // Common configuration and deployment filenames.
+    /(?:^|\/)(?:config|settings)\.(?:js|json|ya?ml|toml|ini|xml|php|py)(?:\.(?:bak|old|orig|save|dist|txt))?$/,
+    /(?:^|\/)(?:settings(?:\.local)?\.php|parameters\.ya?ml(?:\.dist)?|storage\.ya?ml|host\.json|launchsettings\.json|ovh-backups\.json|packages\.config|nuget\.config|web\.config|s3cmd\.ini|local\.xml|serverless\.ya?ml|docker-compose(?:\.[^/]*)?\.ya?ml|compose\.ya?ml)$/,
+    /(?:^|\/)(?:\.gitlab-ci\.yml|gitlab-ci\.yml|\.travis\.yml|appveyor\.yml|circle\.yml|jenkins\.ya?ml|jenkinsfile|wercker\.yml|buildkite\.yml|codeship-(?:steps|services)\.yml|bitrise\.yml|bamboo\.yml)$/,
+
+    // Package inventories, infrastructure state, database dumps, and histories.
+    /(?:^|\/)(?:package(?:-lock)?\.json|pnpm-lock\.ya?ml|yarn\.lock)$/,
+    /(?:^|\/)(?:terraform\.tfstate(?:\.backup)?|[^/]+\.tfvars)$/,
+    /(?:^|\/)(?:backup|dump|database|database_backup|db|db_dump|data|mysql|mysql_dump|site)\.sql(?:\.bak)?$/,
+    /(?:^|\/)(?:postman(?:_collection)?|docs\/postman)\.json$/,
+    /(?:^|\/)(?:node_repl|psql|bash|zsh)_history$/,
+    /(?:^|\/)wgetrc$/,
+
+    // Server controls and unrelated framework probes.
+    /(?:^|\/)actuator(?:\/|$)/,
+    /(?:^|\/)[^/]*(?:phpinfo|php-info|phpversion|server-info|server-status)[^/]*(?:\.php)?$/,
+    /(?:^|\/)(?:phpinfo(?:\.php)?|php-info\.php|phpversion\.php|server-info\.php|server-status\.php|php\.php|info(?:\.php)?|i\.php|pi\.php|pinfo\.php|p\.php|test\.php|debug\.php|_phpinfo\.php)$/,
+    /(?:^|\/)_environment$/,
+    /(?:^|\/)(?:settings|config)\.(?:php|py)\.(?:bak|old|orig|save|dist|txt)$/,
     /(?:^|\/)\.htaccess$/,
-    /(?:^|\/)\.htpasswd$/
+    /(?:^|\/)\.htpasswd$/,
+    /(?:^|\/)(?:wordpress|wp(?:-json|-admin|-content|-includes)?)(?:\/|$)/
   ];
 
   if (blockedPatterns.some(pattern => pattern.test(pathname))) {

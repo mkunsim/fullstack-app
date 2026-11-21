@@ -22,7 +22,7 @@ export default function AccountPage({
   onCancelCarBooking,
 }: AccountPageProps) {
   return (
-    <main className="portal account-page">
+    <main className={`portal account-page${user ? "" : " account-page--signed-out"}`}>
       <div className="section-head">
         <div><span className="eyebrow dark">YOUR WILDPATH</span><h2>My <em>account.</em></h2></div>
         {user && <span className="role-tag">{user.role === "ADMIN" ? "ADMINISTRATOR" : "CUSTOMER"}</span>}
@@ -48,7 +48,7 @@ export default function AccountPage({
               <thead><tr><th>Safari tour</th><th>Departure</th><th>Guests</th><th>Total</th><th>Booking</th><th>Payment</th></tr></thead>
               <tbody>{bookings.map((booking) => <tr key={booking.id}>
                 <td>{booking.tourName}<small>{booking.destination}</small>
-                  {booking.addOns?.map((experience) => <small key={experience.experienceId}>Add-on: {experience.name} (USD {experience.price.toFixed(2)} per booking)</small>)}
+                  {booking.optionalExperiences?.map((optionalExperience) => <small key={optionalExperience.optionalExperienceId}>Optional experience: {optionalExperience.name} (USD {optionalExperience.price.toFixed(2)} per booking)</small>)}
                 </td>
                 <td>{new Date(`${booking.startDate}T00:00:00`).toLocaleDateString()}</td>
                 <td>{booking.guests}</td>

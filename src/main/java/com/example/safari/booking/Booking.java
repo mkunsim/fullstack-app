@@ -100,15 +100,13 @@ public class Booking {
 
     @Builder.Default
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-            name = "booking_special_experiences",
-            joinColumns = @JoinColumn(
-                    name = "booking_id",
-                    foreignKey = @ForeignKey(name = "fk_booking_special_experiences_booking_id")
+    @CollectionTable(name = "booking_optional_experiences",
+            joinColumns = @JoinColumn(name = "booking_id",
+                    foreignKey = @ForeignKey(name = "fk_booking_optional_experiences_booking_id")
             )
     )
     @OrderColumn(name = "selection_order")
-    private List<BookedAddOn> addOns = new ArrayList<>();
+    private List<BookedOptionalExperience> optionalExperiences = new ArrayList<>();
 
     @Builder.Default
     @Column(length = 3)
@@ -137,7 +135,7 @@ public class Booking {
         this.customer = customer;
         this.departure = departure;
         this.guests = guests;
-        this.addOns = new ArrayList<>();
+        this.optionalExperiences = new ArrayList<>();
         this.totalAmount = totalAmount.setScale(2, RoundingMode.HALF_UP);
         this.currency = "USD";
         this.status = BookingStatus.PENDING;
@@ -185,8 +183,8 @@ public class Booking {
     public void setPaymentCheckoutUrl(String paymentCheckoutUrl) { this.paymentCheckoutUrl = paymentCheckoutUrl; }
     public void setPaymentCurrency(String paymentCurrency) { this.paymentCurrency = paymentCurrency; }
 
-    public void addAddOn(AddOn experience) {
-        addOns.add(new BookedAddOn(
+    public void addOptionalExperience(OptionalExperience experience) {
+        optionalExperiences.add(new BookedOptionalExperience(
                 experience.getId(),
                 experience.getName(),
                 experience.getDescription(),
@@ -199,7 +197,7 @@ public class Booking {
     @Embeddable
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class BookedAddOn {
+    public static class BookedOptionalExperience {
         @Column(name = "experience_id", nullable = false)
         private Long experienceId;
 
@@ -218,7 +216,7 @@ public class Booking {
         @Column(name = "available", nullable = false)
         private boolean available;
 
-        private BookedAddOn(
+        private BookedOptionalExperience(
                 Long experienceId,
                 String name,
                 String description,

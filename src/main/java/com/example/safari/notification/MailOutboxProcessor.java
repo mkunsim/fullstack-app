@@ -32,6 +32,11 @@ public class MailOutboxProcessor {
             return;
         }
         for (MailOutboxMessage message : outbox.claimBatch()) {
+            Long id = message.getId();
+            if (id == null) {
+                log.error("Mail outbox message has no ID; skipping delivery");
+                continue;
+            }
             try {
                 SimpleMailMessage mail = new SimpleMailMessage();
                 mail.setFrom(sender);
@@ -39,9 +44,9 @@ public class MailOutboxProcessor {
                 mail.setSubject(message.getSubject());
                 mail.setText(message.getBody());
                 mailSender.send(mail);
-                outbox.markSent(message.getId());
+                outbox.markSent(id);
             } catch (RuntimeException ex) {
-                outbox.scheduleRetry(message.getId(), message.getAttempts(), ex);
+                outbox.scheduleRetry(id, message.getAttempts(), ex);
                 log.error("Mail outbox message {} delivery failed", message.getId(), ex);
             }
         }

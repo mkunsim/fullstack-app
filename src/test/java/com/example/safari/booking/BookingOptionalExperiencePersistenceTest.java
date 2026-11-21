@@ -11,14 +11,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest(properties = {
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
-class BookingAddOnPersistenceTest {
-
+class BookingOptionalExperiencePersistenceTest {
     @Autowired
     private EntityManager entityManager;
 
@@ -26,7 +26,7 @@ class BookingAddOnPersistenceTest {
     private BookingRepository bookings;
 
     @Test
-    void persistsSelectedAddOnSnapshotOnBooking() {
+    void persistsSelectedOptionalExperienceSnapshotOnBooking() {
         Tour tour = new Tour(
                 "Serengeti",
                 "Safari",
@@ -52,14 +52,14 @@ class BookingAddOnPersistenceTest {
         );
         entityManager.persist(customer);
 
-        AddOn selectedAddOn = new AddOn(
+        OptionalExperience selectedOptionalExperience = new OptionalExperience(
                 "Local hospitality",
                 "A local cultural experience.",
                 "Share any requirements in advance.",
                 new BigDecimal("25.50"),
                 true
         );
-        entityManager.persist(selectedAddOn);
+        entityManager.persist(selectedOptionalExperience);
         entityManager.flush();
 
         Booking booking = new Booking(
@@ -68,16 +68,17 @@ class BookingAddOnPersistenceTest {
                 2,
                 new BigDecimal("275.50")
         );
-        booking.addAddOn(selectedAddOn);
+        booking.addOptionalExperience(selectedOptionalExperience);
         entityManager.persist(booking);
         entityManager.flush();
+        Long bookingId = Objects.requireNonNull(booking.getId());
         entityManager.clear();
 
-        Booking persistedBooking = bookings.findById(booking.getId()).orElseThrow();
+        Booking persistedBooking = bookings.findById(bookingId).orElseThrow();
 
-        assertEquals(1, persistedBooking.getAddOns().size());
-        assertEquals(selectedAddOn.getId(), persistedBooking.getAddOns().get(0).getExperienceId());
-        assertEquals("Local hospitality", persistedBooking.getAddOns().get(0).getName());
-        assertEquals(new BigDecimal("25.50"), persistedBooking.getAddOns().get(0).getPrice());
+        assertEquals(1, persistedBooking.getOptionalExperiences().size());
+        assertEquals(selectedOptionalExperience.getId(), persistedBooking.getOptionalExperiences().get(0).getExperienceId());
+        assertEquals("Local hospitality", persistedBooking.getOptionalExperiences().get(0).getName());
+        assertEquals(new BigDecimal("25.50"), persistedBooking.getOptionalExperiences().get(0).getPrice());
     }
 }

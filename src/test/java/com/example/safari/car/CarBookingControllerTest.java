@@ -75,7 +75,7 @@ class CarBookingControllerTest {
     }
 
     @Test
-    @SuppressWarnings("null")
+    @SuppressWarnings("null") // Mockito matchers use null as a stubbing sentinel.
     void createsPricedCarBookingForCustomer() {
         LocalDate startDate = LocalDate.now().plusDays(10);
         LocalDate endDate = startDate.plusDays(3);

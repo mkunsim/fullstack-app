@@ -26,7 +26,8 @@ class BookingServiceTest {
     @Mock BookingEmailService emailService;
     @Mock DepartureRepository departures;
     BookingService service;
-    private final Booking booking = createBooking();
+    @NonNull
+    private final Booking booking = Objects.requireNonNull(createBooking());
 
     @BeforeEach
     void setUp() {

@@ -1,7 +1,7 @@
 package com.example.safari.tour;
 
-import com.example.safari.booking.AddOn;
-import com.example.safari.booking.AddOnRepository;
+import com.example.safari.booking.OptionalExperience;
+import com.example.safari.booking.OptionalExperienceRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -13,14 +13,14 @@ import java.util.List;
 @RequestMapping("/api/tours")
 public class TourController {
     private final TourRepository tours;
-    private final AddOnRepository addOns;
+    private final OptionalExperienceRepository optionalExperiences;
 
-    public TourController(TourRepository tours, AddOnRepository addOns) {
+    public TourController(TourRepository tours, OptionalExperienceRepository optionalExperiences) {
         this.tours = tours;
-        this.addOns = addOns;
+        this.optionalExperiences = optionalExperiences;
     }
 
-    public record AddOnView(
+    public record OptionalExperienceView(
             Long id,
             String name,
             String description,
@@ -38,15 +38,15 @@ public class TourController {
             String imageUrl,
             boolean active,
             List<Departure> departures,
-            List<AddOnView> addOns
+            List<OptionalExperienceView> optionalExperiences
     ) {}
 
     @GetMapping
     @Transactional(readOnly = true)
     public List<TourView> all() {
-        List<AddOn> availableAddOns = addOns.findByAvailableTrueOrderByIdAsc();
+        List<OptionalExperience> availableOptionalExperiences = optionalExperiences.findByAvailableTrueOrderByIdAsc();
         return tours.findByActiveTrueOrderByIdAsc().stream()
-                .map(tour -> view(tour, availableAddOns))
+                .map(tour -> view(tour, availableOptionalExperiences))
                 .toList();
     }
 
@@ -56,13 +56,13 @@ public class TourController {
         if (id == null || id <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A valid tour ID is required.");
         }
-        List<AddOn> availableAddOns = addOns.findByAvailableTrueOrderByIdAsc();
-        return tours.findById(id).filter(Tour::isActive)
-            .map(tour -> view(tour, availableAddOns))
+        List<OptionalExperience> availableOptionalExperiences = optionalExperiences.findByAvailableTrueOrderByIdAsc();
+        return tours.findById(id).filter(tour -> tour.isActive())
+            .map(tour -> view(tour, availableOptionalExperiences))
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tour not found"));
     }
 
-    private TourView view(Tour tour, List<AddOn> availableAddOns) {
+    private TourView view(Tour tour, List<OptionalExperience> availableOptionalExperiences) {
         return new TourView(
                 tour.getId(),
                 tour.getName(),
@@ -73,14 +73,14 @@ public class TourController {
                 tour.getImageUrl(),
                 tour.isActive(),
                 tour.getDepartures(),
-                availableAddOns.stream()
-                        .map(addOn -> new AddOnView(
-                                addOn.getId(),
-                                addOn.getName(),
-                                addOn.getDescription(),
-                                addOn.getPreference(),
-                                addOn.getPrice(),
-                                addOn.isAvailable()
+                availableOptionalExperiences.stream()
+                        .map(optionalExperience -> new OptionalExperienceView(
+                                optionalExperience.getId(),
+                                optionalExperience.getName(),
+                                optionalExperience.getDescription(),
+                                optionalExperience.getPreference(),
+                                optionalExperience.getPrice(),
+                                optionalExperience.isAvailable()
                         ))
                         .toList()
         );

@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router-dom";
-import type { AddOn, AdminBooking, CarBooking, SafariCar, Tour, User } from "../types";
+import type { OptionalExperience, AdminBooking, CarBooking, SafariCar, Tour, User } from "../types";
 
 export interface AdminTourForm {
   name: string;
@@ -27,7 +27,7 @@ export interface AdminCarForm {
   imageUrl: string;
 }
 
-export interface AdminAddOnForm {
+export interface AdminOptionalExperienceForm {
   name: string;
   description: string;
   preference: string;
@@ -38,7 +38,7 @@ export interface AdminAddOnForm {
 interface AdminPageProps {
   user: User | null;
   tours: Tour[];
-  addOns: AddOn[];
+  optionalExperiences: OptionalExperience[];
   cars: SafariCar[];
   tourBookings: AdminBooking[];
   carBookings: CarBooking[];
@@ -55,22 +55,22 @@ interface AdminPageProps {
   onUpdateCar: (id: number, active: boolean, event: FormEvent<HTMLFormElement>) => void;
   onUpdateBookingStatus: (id: number, status: "CONFIRMED" | "CANCELLED" | "DECLINED") => void;
   onUpdateCarBookingStatus: (id: number, status: "CONFIRMED" | "CANCELLED" | "DECLINED") => void;
-  addOnForm: AdminAddOnForm;
-  setAddOnForm: Dispatch<SetStateAction<AdminAddOnForm>>;
-  editingAddOnId: number | null;
-  setEditingAddOnId: Dispatch<SetStateAction<number | null>>;
-  onCreateAddOn: (input: AdminAddOnForm) => void;
-  onUpdateAddOn: (id: number, input: AdminAddOnForm) => void;
+  optionalExperienceForm: AdminOptionalExperienceForm;
+  setOptionalExperienceForm: Dispatch<SetStateAction<AdminOptionalExperienceForm>>;
+  editingOptionalExperienceId: number | null;
+  setEditingOptionalExperienceId: Dispatch<SetStateAction<number | null>>;
+  onCreateOptionalExperience: (input: AdminOptionalExperienceForm) => void;
+  onUpdateOptionalExperience: (id: number, input: AdminOptionalExperienceForm) => void;
   notice: string;
 }
 
 export default function AdminPage(props: AdminPageProps) {
   const {
-    user, tours, addOns, cars, tourBookings, carBookings,
+    user, tours, optionalExperiences, cars, tourBookings, carBookings,
     tourForm, setTourForm, departureForm, setDepartureForm,
     carForm, setCarForm, onCreateTour, onUpdateTour, onCreateDeparture, onCreateCar,
     onUpdateCar, onUpdateBookingStatus, onUpdateCarBookingStatus, notice,
-    addOnForm, setAddOnForm, editingAddOnId, setEditingAddOnId, onCreateAddOn, onUpdateAddOn,
+    optionalExperienceForm, setOptionalExperienceForm, editingOptionalExperienceId, setEditingOptionalExperienceId, onCreateOptionalExperience, onUpdateOptionalExperience,
   } = props;
   const [editingTourId, setEditingTourId] = useState<number | null>(null);
   const [editingTourActive, setEditingTourActive] = useState(true);
@@ -115,15 +115,15 @@ export default function AdminPage(props: AdminPageProps) {
     });
   }
 
-  function selectAddOn(id: number | null) {
-    setEditingAddOnId(id);
-    const addOn = addOns.find((row) => row.id === id);
-    setAddOnForm(addOn ? {
-      name: addOn.name,
-      description: addOn.description,
-      preference: addOn.preference,
-      price: addOn.price,
-      available: addOn.available,
+  function selectOptionalExperience(id: number | null) {
+    setEditingOptionalExperienceId(id);
+    const optionalExperience = optionalExperiences.find((row) => row.id === id);
+    setOptionalExperienceForm(optionalExperience ? {
+      name: optionalExperience.name,
+      description: optionalExperience.description,
+      preference: optionalExperience.preference,
+      price: optionalExperience.price,
+      available: optionalExperience.available,
     } : { name: "", description: "", preference: "", price: 0, available: true });
   }
 
@@ -137,10 +137,10 @@ export default function AdminPage(props: AdminPageProps) {
     else onUpdateCar(editingCarId, editingCarActive, event);
   }
 
-  function submitAddOnForm(event: FormEvent<HTMLFormElement>) {
+  function submitOptionalExperienceForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (editingAddOnId === null) onCreateAddOn(addOnForm);
-    else onUpdateAddOn(editingAddOnId, addOnForm);
+    if (editingOptionalExperienceId === null) onCreateOptionalExperience(optionalExperienceForm);
+    else onUpdateOptionalExperience(editingOptionalExperienceId, optionalExperienceForm);
   }
 
   if (!user || user.role !== "ADMIN") {
@@ -176,25 +176,25 @@ export default function AdminPage(props: AdminPageProps) {
           </form>
         </section>
         <section className="panel">
-          <h3>{editingAddOnId === null ? "Create optional experience" : "Edit optional experience"}</h3>
-          <form className="stack-form" onSubmit={submitAddOnForm}>
-            <label>Edit existing experience<select value={editingAddOnId ?? ""} onChange={(event) => selectAddOn(event.target.value ? Number(event.target.value) : null)}>
+          <h3>{editingOptionalExperienceId === null ? "Create optional experience" : "Edit optional experience"}</h3>
+          <form className="stack-form" onSubmit={submitOptionalExperienceForm}>
+            <label>Edit existing experience<select value={editingOptionalExperienceId ?? ""} onChange={(event) => selectOptionalExperience(event.target.value ? Number(event.target.value) : null)}>
               <option value="">Create a new experience</option>
-              {addOns.map((addOn) => <option key={addOn.id} value={addOn.id}>{addOn.name}</option>)}
+              {optionalExperiences.map((optionalExperience) => <option key={optionalExperience.id} value={optionalExperience.id}>{optionalExperience.name}</option>)}
             </select></label>
-            <label>Name<input required maxLength={150} value={addOnForm.name} onChange={(event) => setAddOnForm({ ...addOnForm, name: event.target.value })} /></label>
-            <label>Description<textarea required maxLength={2000} value={addOnForm.description} onChange={(event) => setAddOnForm({ ...addOnForm, description: event.target.value })} /></label>
-            <label>Preference or service requirements<textarea required maxLength={1000} value={addOnForm.preference} onChange={(event) => setAddOnForm({ ...addOnForm, preference: event.target.value })} /></label>
-            <label>Price per booking (USD)<input required type="number" min={0} step="0.01" value={addOnForm.price} onChange={(event) => setAddOnForm({ ...addOnForm, price: Number(event.target.value) })} /></label>
-            {editingAddOnId !== null && <label className="checkbox-label"><input type="checkbox" checked={addOnForm.available} onChange={(event) => setAddOnForm({ ...addOnForm, available: event.target.checked })} /> Available to customers</label>}
-            <button className="primary-btn" type="submit">{editingAddOnId === null ? "Create experience" : "Save experience"}</button>
+            <label>Name<input required maxLength={150} value={optionalExperienceForm.name} onChange={(event) => setOptionalExperienceForm({ ...optionalExperienceForm, name: event.target.value })} /></label>
+            <label>Description<textarea required maxLength={2000} value={optionalExperienceForm.description} onChange={(event) => setOptionalExperienceForm({ ...optionalExperienceForm, description: event.target.value })} /></label>
+            <label>Preference or service requirements<textarea required maxLength={1000} value={optionalExperienceForm.preference} onChange={(event) => setOptionalExperienceForm({ ...optionalExperienceForm, preference: event.target.value })} /></label>
+            <label>Price per booking (USD)<input required type="number" min={0} step="0.01" value={optionalExperienceForm.price} onChange={(event) => setOptionalExperienceForm({ ...optionalExperienceForm, price: Number(event.target.value) })} /></label>
+            {editingOptionalExperienceId !== null && <label className="checkbox-label"><input type="checkbox" checked={optionalExperienceForm.available} onChange={(event) => setOptionalExperienceForm({ ...optionalExperienceForm, available: event.target.checked })} /> Available to customers</label>}
+            <button className="primary-btn" type="submit">{editingOptionalExperienceId === null ? "Create experience" : "Save experience"}</button>
           </form>
-          {addOns.length > 0 && <div className="table-scroll">
+          {optionalExperiences.length > 0 && <div className="table-scroll">
             <table><thead><tr><th>Experience</th><th>Price</th><th>Availability</th></tr></thead>
-              <tbody>{addOns.map((addOn) => <tr key={addOn.id}>
-                <td>{addOn.name}<small>{addOn.description}</small></td>
-                <td>USD {addOn.price.toFixed(2)}</td>
-                <td>{addOn.available ? "Available" : "Hidden"} <button type="button" className="text-link" onClick={() => selectAddOn(addOn.id)}>Edit</button></td>
+              <tbody>{optionalExperiences.map((optionalExperience) => <tr key={optionalExperience.id}>
+                <td>{optionalExperience.name}<small>{optionalExperience.description}</small></td>
+                <td>USD {optionalExperience.price.toFixed(2)}</td>
+                <td>{optionalExperience.available ? "Available" : "Hidden"} <button type="button" className="text-link" onClick={() => selectOptionalExperience(optionalExperience.id)}>Edit</button></td>
               </tr>)}</tbody>
             </table>
           </div>}
@@ -240,7 +240,7 @@ export default function AdminPage(props: AdminPageProps) {
         <section className="panel table-panel">
           <h3>Experience bookings</h3>
           {tourBookings.length ? <div className="table-scroll"><table><thead><tr><th>Experience</th><th>Customer</th><th>Departure</th><th>Guests</th><th>Total</th><th>Status</th></tr></thead>
-            <tbody>{tourBookings.map((booking) => <tr key={booking.id}>            <td>{booking.tourName}<small>{booking.destination}</small>{booking.addOns?.map((experience) => <small key={experience.experienceId}>Add-on: {experience.name} (USD {experience.price.toFixed(2)} per booking)</small>)}</td><td>{booking.customerName}<small>{booking.customerEmail}</small></td><td>{new Date(`${booking.startDate}T00:00:00`).toLocaleDateString()}</td><td>{booking.guests}</td><td>{booking.currency} {booking.totalAmount.toLocaleString()}</td><td>{booking.status}{booking.status === "PENDING" && <div className="admin-booking-actions"><button className="text-link" onClick={() => onUpdateBookingStatus(booking.id, "CONFIRMED")}>Confirm</button><button className="text-link" onClick={() => onUpdateBookingStatus(booking.id, "DECLINED")}>Decline</button><button className="text-link" onClick={() => onUpdateBookingStatus(booking.id, "CANCELLED")}>Cancel</button></div>}</td></tr>)}</tbody>
+            <tbody>{tourBookings.map((booking) => <tr key={booking.id}>            <td>{booking.tourName}<small>{booking.destination}</small>{booking.optionalExperiences?.map((optionalExperience) => <small key={optionalExperience.optionalExperienceId}>Optional experience: {optionalExperience.name} (USD {optionalExperience.price.toFixed(2)} per booking)</small>)}</td><td>{booking.customerName}<small>{booking.customerEmail}</small></td><td>{new Date(`${booking.startDate}T00:00:00`).toLocaleDateString()}</td><td>{booking.guests}</td><td>{booking.currency} {booking.totalAmount.toLocaleString()}</td><td>{booking.status}{booking.status === "PENDING" && <div className="admin-booking-actions"><button className="text-link" onClick={() => onUpdateBookingStatus(booking.id, "CONFIRMED")}>Confirm</button><button className="text-link" onClick={() => onUpdateBookingStatus(booking.id, "DECLINED")}>Decline</button><button className="text-link" onClick={() => onUpdateBookingStatus(booking.id, "CANCELLED")}>Cancel</button></div>}</td></tr>)}</tbody>
           </table></div> : <p>No experience bookings yet.</p>}
         </section>
         <section className="panel table-panel">

@@ -1,5 +1,6 @@
 package com.example.safari.notification;
 
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class MailOutboxStore {
     }
 
     @Transactional
-    public void markSent(Long id) {
+    public void markSent(@NonNull Long id) {
         messages.findById(id).ifPresent(message -> {
             message.markSent(Instant.now());
             messages.save(message);
@@ -39,7 +40,7 @@ public class MailOutboxStore {
     }
 
     @Transactional
-    public void scheduleRetry(Long id, int attempts, RuntimeException failure) {
+    public void scheduleRetry(@NonNull Long id, int attempts, RuntimeException failure) {
         messages.findById(id).ifPresent(message -> {
             long delaySeconds = Math.min(3600, 30L << Math.min(attempts, 7));
             message.scheduleRetry(

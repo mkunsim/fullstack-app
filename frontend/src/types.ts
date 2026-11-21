@@ -17,7 +17,7 @@ export type BookingResponse = {
 }
 
 export type Departure = {id:number;startDate:string;capacity:number;availableGuests:number}
-export type AddOn = {
+export type OptionalExperience = {
   id: number;
   name: string;
   description: string;
@@ -25,17 +25,17 @@ export type AddOn = {
   price: number;
   available: boolean;
 }
-export type SelectedAddOn = {
-  experienceId: number;
+export type SelectedOptionalExperience = {
+  optionalExperienceId: number;
   name: string;
   description: string;
   preference: string;
   price: number;
 }
-export type Tour = {id:number;name:string;description:string;destination:string;durationDays:number;pricePerPerson:number;imageUrl:string;departures:Departure[];addOns:AddOn[];active?:boolean}
+export type Tour = {id:number;name:string;description:string;destination:string;durationDays:number;pricePerPerson:number;imageUrl:string;departures:Departure[];optionalExperiences:OptionalExperience[];active?:boolean}
 export type User = {email:string;fullName:string;role:'CUSTOMER'|'ADMIN'}
 export type BookingStatus = "PENDING" | "CONFIRMED" | "DECLINED" | "CANCELLED"
-export type Booking = {id:number;tourName:string;destination:string;startDate:string;guests:number;totalAmount:number;currency:string;status:BookingStatus;paymentStatus:string;addOns:SelectedAddOn[]}
+export type Booking = {id:number;tourName:string;destination:string;startDate:string;guests:number;totalAmount:number;currency:string;status:BookingStatus;paymentStatus:string;optionalExperiences:SelectedOptionalExperience[]}
 export type AdminBooking = Booking & {customerName:string;customerEmail:string}
 
 export type SafariCar = {

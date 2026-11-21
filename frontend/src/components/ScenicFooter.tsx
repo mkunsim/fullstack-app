@@ -8,6 +8,8 @@ type ScenicFooterProps = {
 
 export default function ScenicFooter({ totalHits, hitCountUnavailable }: ScenicFooterProps) {
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewSummary, setReviewSummary] = useState<api.ReviewSummary | null>(null);
+  const [reviewSummaryLoading, setReviewSummaryLoading] = useState(true);
   const [rating, setRating] = useState<number | null>(null);
   const [reviewText, setReviewText] = useState("");
   const [reviewBusy, setReviewBusy] = useState(false);
@@ -15,6 +17,21 @@ export default function ScenicFooter({ totalHits, hitCountUnavailable }: ScenicF
   const [reviewError, setReviewError] = useState("");
   const reviewButtonRef = useRef<HTMLButtonElement>(null);
   const firstStarRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    api.getReviewSummary()
+      .then((summary) => {
+        if (mounted) setReviewSummary(summary);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (mounted) setReviewSummaryLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!reviewOpen) return;
@@ -47,12 +64,21 @@ export default function ScenicFooter({ totalHits, hitCountUnavailable }: ScenicF
     try {
       await api.submitReview({ rating, text: reviewText });
       setReviewSent(true);
+      void api.getReviewSummary().then(setReviewSummary).catch(() => {});
     } catch (reason) {
       setReviewError(reason instanceof Error ? reason.message : "Could not send your review. Please try again.");
     } finally {
       setReviewBusy(false);
     }
   }
+
+  const averageRating = reviewSummary?.averageRating ?? 0;
+  const starFill = `${Math.min(5, Math.max(0, averageRating)) * 20}%`;
+  const ratingDescription = reviewSummary
+    ? reviewSummary.reviewCount === 0
+      ? "No reviews yet"
+      : `${averageRating.toFixed(1)} out of 5 from ${reviewSummary.reviewCount} ${reviewSummary.reviewCount === 1 ? "review" : "reviews"}`
+    : "Rating unavailable";
 
   return (
     <>
@@ -68,9 +94,17 @@ export default function ScenicFooter({ totalHits, hitCountUnavailable }: ScenicF
             type="button"
             onClick={() => setReviewOpen(true)}
             aria-haspopup="dialog"
-            aria-label="Write a review for Safari Online"
+            aria-label={`${ratingDescription}. Write a review for Safari Online.`}
           >
-            <span className="rating-badge-stars" aria-hidden="true">★★★★★</span>
+            <span className="rating-badge-stars" aria-hidden="true">
+              <span className="rating-stars-track">★★★★★</span>
+              <span className="rating-stars-fill" style={{ width: starFill }}>★★★★★</span>
+            </span>
+            <span className="rating-badge-score">
+              {reviewSummary?.reviewCount
+                ? `${averageRating.toFixed(1)} #${reviewSummary.reviewCount}`
+                : reviewSummary ? "No reviews" : reviewSummaryLoading ? "Loading" : "Unavailable"}
+            </span>
             <span className="rating-badge-reviews">WRITE A REVIEW</span>
           </button>
           <p className="visit-count" aria-live="polite">

@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -34,7 +35,7 @@ public class BookingController {
     private final BookingRepository bookings;
     private final AppUserRepository users;
     private final DepartureRepository departures;
-    private final AddOnRepository addOns;
+    private final OptionalExperienceRepository optionalExperiences;
     private final BookingEmailService emailService;
     private final OperatorEmailService operatorEmailService;
     private final PasswordlessAuthService authService;
@@ -44,7 +45,7 @@ public class BookingController {
             BookingRepository bookings,
             AppUserRepository users,
             DepartureRepository departures,
-            AddOnRepository addOns,
+            OptionalExperienceRepository optionalExperiences,
             BookingEmailService emailService,
             OperatorEmailService operatorEmailService,
             PasswordlessAuthService authService,
@@ -53,14 +54,14 @@ public class BookingController {
         this.bookings = bookings;
         this.users = users;
         this.departures = departures;
-        this.addOns = addOns;
+        this.optionalExperiences = optionalExperiences;
         this.emailService = emailService;
         this.operatorEmailService = operatorEmailService;
         this.authService = authService;
         this.bookingService = bookingService;
     }
 
-    public record AddOnView(
+    public record OptionalExperienceView(
             Long experienceId,
             String name,
             String description,
@@ -78,7 +79,7 @@ public class BookingController {
             String currency,
             String status,
             String paymentStatus,
-            List<AddOnView> addOns
+            List<OptionalExperienceView> optionalExperiences
     ) {}
 
     @PostMapping
@@ -114,43 +115,48 @@ public class BookingController {
             );
         }
 
-        // 2. Validate selected add-ons
+        // 2. Validate selected optional-experiences
 
-        List<Long> requestedIds = request.addOnIds() == null
+        List<Long> requestedIds = request.optionalExperienceIds() == null
                 ? List.of()
-                : request.addOnIds();
+                : request.optionalExperienceIds();
 
         Set<Long> uniqueIds = new HashSet<>(requestedIds);
 
         if (uniqueIds.size() != requestedIds.size()) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "An add-on cannot be selected more than once."
+                    "An optional experience cannot be selected more than once."
             );
         }
 
-        List<AddOn> selectedAddOns = new ArrayList<>();
+        List<OptionalExperience> selectedOptionalExperiences = new ArrayList<>();
 
-        BigDecimal addOnTotal = BigDecimal.ZERO;
+        BigDecimal optionalExperienceTotal = BigDecimal.ZERO;
 
-        for (Long addOnId : requestedIds) {
-
-            AddOn addOn = addOns.findById(addOnId)
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST,
-                            "Selected add-on does not exist."
-                    ));
-
-            if (!addOn.isAvailable()) {
+        for (Long optionalExperienceId : requestedIds) {
+            if (optionalExperienceId == null) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
-                        "Selected add-on is unavailable."
+                "Optional experience IDs cannot be null."
+                );
+            }
+            OptionalExperience experience = optionalExperiences.findById(optionalExperienceId)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Selected optional experience does not exist."
+                    ));
+
+            if (!experience.isAvailable()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Selected optional experience is unavailable."
                 );
             }
 
-            selectedAddOns.add(addOn);
+            selectedOptionalExperiences.add(experience);
 
-            addOnTotal = addOnTotal.add(addOn.getPrice());
+            optionalExperienceTotal = optionalExperienceTotal.add(experience.getPrice());
         }
 
         // 3. Find or create customer
@@ -182,7 +188,7 @@ public class BookingController {
 
         BigDecimal total = departure.getTour().getPricePerPerson()
                 .multiply(BigDecimal.valueOf(request.guests()))
-                .add(addOnTotal);
+                .add(optionalExperienceTotal);
 
         // 5. Reserve departure capacity
 
@@ -199,9 +205,9 @@ public class BookingController {
                         .build()
         );
 
-        // 7. Attach selected add-ons
+        // 7. Attach selected optional-experiences
 
-        selectedAddOns.forEach(newBooking::addAddOn);
+        selectedOptionalExperiences.forEach(newBooking::addOptionalExperience);
 
         Booking booking = bookings.save(newBooking);
 
@@ -236,7 +242,7 @@ public class BookingController {
     @PostMapping("/{id}/cancel")
     @Transactional
     public BookingView cancelOwnBooking(
-            @PathVariable Long id,
+            @PathVariable @NonNull Long id,
             HttpServletRequest request
     ) {
         String email = authService.customerEmailFromRequest(request);
@@ -278,14 +284,14 @@ public class BookingController {
 
         Departure departure = booking.getDeparture();
 
-        List<AddOnView> experiences = booking.getAddOns()
+        List<OptionalExperienceView> experiences = booking.getOptionalExperiences()
                 .stream()
-                .map(addOn -> new AddOnView(
-                        addOn.getExperienceId(),
-                        addOn.getName(),
-                        addOn.getDescription(),
-                        addOn.getPreference(),
-                        addOn.getPrice()
+                .map(optionalExperience -> new OptionalExperienceView(
+                        optionalExperience.getExperienceId(),
+                        optionalExperience.getName(),
+                        optionalExperience.getDescription(),
+                        optionalExperience.getPreference(),
+                        optionalExperience.getPrice()
                 ))
                 .toList();
 

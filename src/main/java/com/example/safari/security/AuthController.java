@@ -10,10 +10,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -45,9 +47,9 @@ public class AuthController {
     @PostMapping("/verify-code")
     public ResponseEntity<UserProfile> verify(@Valid @RequestBody VerifyRequest request) {
         PasswordlessAuthService.AuthResponse result =
-                auth.verifyCode(request.email(), request.code());
+                Objects.requireNonNull(auth.verifyCode(request.email(), request.code()));
         ResponseCookie cookie = sessionCookie(
-                result.token(),
+                Objects.requireNonNull(result.token()),
                 Duration.between(Instant.now(), result.expiresAt()).getSeconds()
         );
         return ResponseEntity.ok()
@@ -68,7 +70,7 @@ public class AuthController {
                 .build();
     }
 
-    private ResponseCookie sessionCookie(String value, long maxAgeSeconds) {
+    private ResponseCookie sessionCookie(@NonNull String value, long maxAgeSeconds) {
         return ResponseCookie.from(PasswordlessAuthService.SESSION_COOKIE, value)
                 .httpOnly(true)
                 .secure(secureCookie)

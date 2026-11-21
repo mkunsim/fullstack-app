@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarDays, Compass, ChevronDown } from "lucide-react";
+import { CalendarDays, Compass, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import EnquiryForm from "./EnquiryForm";
@@ -16,7 +16,7 @@ function formatUsd(amount: number): string {
 interface TourDetailsPageProps {
   tours: Tour[];
   loading: boolean;
-  onBook: (tour: Tour, departureId: number, guests: number, customerName: string, customerEmail: string, addOnIds: number[]) => Promise<void>;
+  onBook: (tour: Tour, departureId: number, guests: number, customerName: string, customerEmail: string, optionalExperienceIds: number[]) => Promise<void>;
 }
 
 export default function TourDetailsPage({ tours, loading, onBook }: TourDetailsPageProps) {
@@ -26,24 +26,24 @@ export default function TourDetailsPage({ tours, loading, onBook }: TourDetailsP
   const [guests, setGuests] = useState(2);
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [selectedExperienceIds, setSelectedExperienceIds] = useState<number[]>([]);
-  const [addOnsDialogOpen, setAddOnsDialogOpen] = useState(false);
+  const [selectedOptionalExperienceIds, setSelectedOptionalExperienceIds] = useState<number[]>([]);
+  const [optionalExperiencesDialogOpen, setOptionalExperiencesDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const optionalItemsRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    setSelectedExperienceIds([]);
+    setSelectedOptionalExperienceIds([]);
   }, [tourId]);
 
   useEffect(() => {
-    if (!addOnsDialogOpen) return;
+    if (!optionalExperiencesDialogOpen) return;
     function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setAddOnsDialogOpen(false);
+      if (event.key === "Escape") setOptionalExperiencesDialogOpen(false);
     }
     function handleOutsideClick(event: PointerEvent) {
       if (event.target instanceof Node && !optionalItemsRef.current?.contains(event.target)) {
-        setAddOnsDialogOpen(false);
+        setOptionalExperiencesDialogOpen(false);
       }
     }
     document.addEventListener("keydown", handleEscape);
@@ -52,24 +52,24 @@ export default function TourDetailsPage({ tours, loading, onBook }: TourDetailsP
       document.removeEventListener("keydown", handleEscape);
       document.removeEventListener("pointerdown", handleOutsideClick);
     };
-  }, [addOnsDialogOpen]);
+  }, [optionalExperiencesDialogOpen]);
 
   if (loading) return <main className="detail-page"><p className="loading">Loading experience…</p></main>;
   if (!tour) return <main className="detail-page"><h1>Safari tour not found</h1><Link to="/safari-tours">Back to safari tours</Link></main>;
   const selectedTour = tour;
 
   const availableDepartures = selectedTour.departures?.filter((item) => item.availableGuests > 0) ?? [];
-  const availableAddOns = selectedTour.addOns?.filter((item) => item.available) ?? [];
+  const availableOptionalExperiences = selectedTour.optionalExperiences?.filter((item) => item.available) ?? [];
   const selectedDeparture = availableDepartures.find((item) => item.id === departureId);
-  const selectedExperiences = availableAddOns.filter((item) => selectedExperienceIds.includes(item.id));
-  const addOnTotal = selectedExperiences.reduce((total, item) => total + item.price, 0);
-  const totalPrice = selectedTour.pricePerPerson * guests + addOnTotal;
+  const selectedOptionalExperiences = availableOptionalExperiences.filter((item) => selectedOptionalExperienceIds.includes(item.id));
+  const optionalExperienceTotal = selectedOptionalExperiences.reduce((total, item) => total + item.price, 0);
+  const totalPrice = selectedTour.pricePerPerson * guests + optionalExperienceTotal;
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!selectedDeparture) return;
     setBusy(true);
     try {
-      await onBook(selectedTour, selectedDeparture.id, guests, customerName, customerEmail, selectedExperienceIds);
+      await onBook(selectedTour, selectedDeparture.id, guests, customerName, customerEmail, selectedOptionalExperienceIds);
     } finally {
       setBusy(false);
     }
@@ -77,7 +77,6 @@ export default function TourDetailsPage({ tours, loading, onBook }: TourDetailsP
 
   return (
     <main className="detail-page">
-      <Link className="back-link" to="/safari-tours"><ArrowLeft size={16} /> All safari tours</Link>
       <div className="detail-layout">
         <div className="detail-content">
           <img className="detail-image" src={tour.imageUrl} alt={tour.name} />
@@ -101,27 +100,27 @@ export default function TourDetailsPage({ tours, loading, onBook }: TourDetailsP
               </div>
               <label>Full name<input required maxLength={120} value={customerName} onChange={(event) => setCustomerName(event.target.value)} /></label>
               <label>Email<input required type="email" maxLength={254} value={customerEmail} onChange={(event) => setCustomerEmail(event.target.value)} /></label>
-              {availableAddOns.length > 0 && (
+              {availableOptionalExperiences.length > 0 && (
                 <section className="optional-items" ref={optionalItemsRef}>
                   <button
                     type="button"
                     className="optional-trigger"
-                    onClick={() => setAddOnsDialogOpen((open) => !open)}
-                    aria-expanded={addOnsDialogOpen}
+                    onClick={() => setOptionalExperiencesDialogOpen((open) => !open)}
+                    aria-expanded={optionalExperiencesDialogOpen}
                     aria-haspopup="dialog"
                     aria-controls="optional-experiences-dialog"
                   >
                     <span className="optional-count">
                       <span className="optional-count-label">
                         <svg className="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        {selectedExperiences.length} {selectedExperiences.length === 1 ? "experience" : "experiences"} selected
+                        {selectedOptionalExperiences.length} {selectedOptionalExperiences.length === 1 ? "experience" : "experiences"} selected
                       </span>
-                      <span className="optional-count-total">Additional cost: {formatUsd(addOnTotal)}</span>
+                      <span className="optional-count-total">Additional cost: {formatUsd(optionalExperienceTotal)}</span>
                     </span>
                     <ChevronDown className="trigger-arrow" size={16} />
                   </button>
 
-                  {addOnsDialogOpen && (
+                  {optionalExperiencesDialogOpen && (
                     <section
                       className="optional-dropdown"
                       id="optional-experiences-dialog"
@@ -141,36 +140,36 @@ export default function TourDetailsPage({ tours, loading, onBook }: TourDetailsP
                         />
                       </div>
                       <ul className="optional-list">
-                        {availableAddOns
-                          .filter((experience) =>
-                            experience.name
+                        {availableOptionalExperiences
+                          .filter((optionalExperience) =>
+                            optionalExperience.name
                               .toLowerCase()
                               .includes(searchQuery.toLowerCase())
                           )
-                          .map((experience) => {
-                            const isSelected = selectedExperienceIds.includes(experience.id);
+                          .map((optionalExperience) => {
+                            const isSelected = selectedOptionalExperienceIds.includes(optionalExperience.id);
                             return (
-                              <li key={experience.id} className="optional-item">
+                              <li key={optionalExperience.id} className="optional-item">
                                 <label className="optional-row">
                                   <input
                                     type="checkbox"
                                     checked={isSelected}
                                     onChange={() =>
-                                      setSelectedExperienceIds((current) =>
+                                      setSelectedOptionalExperienceIds((current) =>
                                         isSelected
-                                          ? current.filter((id) => id !== experience.id)
-                                          : [...current, experience.id]
+                                          ? current.filter((id) => id !== optionalExperience.id)
+                                          : [...current, optionalExperience.id]
                                       )
                                     }
                                   />
                                   <span
                                     className="optional-name"
-                                    title={`Description: ${experience.description}\nPreference: ${experience.preference}\nUSD ${experience.price.toFixed(2)}`}
+                                    title={`Description: ${optionalExperience.description}\nPreference: ${optionalExperience.preference}\nUSD ${optionalExperience.price.toFixed(2)}`}
                                   >
-                                    {experience.name}
+                                    {optionalExperience.name}
                                   </span>
                                   <span className="optional-price">
-                                    {experience.price === 0 ? "No extra charge" : `+${formatUsd(experience.price)}`}
+                                    {optionalExperience.price === 0 ? "No extra charge" : `+${formatUsd(optionalExperience.price)}`}
                                   </span>
                                 </label>
                               </li>
@@ -180,13 +179,13 @@ export default function TourDetailsPage({ tours, loading, onBook }: TourDetailsP
                       <div className="optional-footer">
                         <div className="optional-footer-total" aria-live="polite">
                           <span>Additional cost</span>
-                          <strong>{formatUsd(addOnTotal)}</strong>
+                          <strong>{formatUsd(optionalExperienceTotal)}</strong>
                         </div>
                         <div className="optional-footer-actions">
-                          <button type="button" className="clear-all" onClick={() => setSelectedExperienceIds([])}>
+                          <button type="button" className="clear-all" onClick={() => setSelectedOptionalExperienceIds([])}>
                             Clear all
                           </button>
-                          <button type="button" className="done-btn" onClick={() => setAddOnsDialogOpen(false)}>
+                          <button type="button" className="done-btn" onClick={() => setOptionalExperiencesDialogOpen(false)}>
                             Done
                           </button>
                         </div>

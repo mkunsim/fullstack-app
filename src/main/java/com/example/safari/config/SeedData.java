@@ -2,8 +2,8 @@
 package com.example.safari.config;
 
 import com.example.safari.security.AppUserRepository;
-import com.example.safari.booking.AddOn;
-import com.example.safari.booking.AddOnRepository;
+import com.example.safari.booking.OptionalExperience;
+import com.example.safari.booking.OptionalExperienceRepository;
 import com.example.safari.tour.*;
 import com.example.safari.car.Car;
 import com.example.safari.car.CarRepository;
@@ -33,7 +33,7 @@ public class SeedData {
             DepartureRepository departures,
             AppUserRepository users,
             CarRepository cars,
-            AddOnRepository addOns
+            OptionalExperienceRepository optionalExperiences
     ) {
         return args -> {
 
@@ -57,37 +57,37 @@ public class SeedData {
                 }
             }
 
-            if (addOns.count() == 0) {
-                addOns.saveAll(Objects.requireNonNull(List.of(
-                        Objects.requireNonNull(AddOn.builder()
+            if (optionalExperiences.count() == 0) {
+                optionalExperiences.saveAll(Objects.requireNonNull(List.of(
+                        Objects.requireNonNull(OptionalExperience.builder()
                                 .name("Meet a local person")
                                 .description("Meet and learn from a local person in the destination community.")
                                 .preference("Specify whether you would prefer to meet a woman or man, and arrange the meeting with the local host in advance.")
                                 .price(new BigDecimal("20.00"))
                                 .available(true)
                                 .build()),
-                        Objects.requireNonNull(AddOn.builder()
+                        Objects.requireNonNull(OptionalExperience.builder()
                                 .name("Local hospitality experience")
                                 .description("Enjoy a welcome and hospitality experience with local hosts.")
                                 .preference("Share dietary or accessibility requirements when booking.")
                                 .price(new BigDecimal("30.00"))
                                 .available(true)
                                 .build()),
-                        Objects.requireNonNull(AddOn.builder()
+                        Objects.requireNonNull(OptionalExperience.builder()
                                 .name("Local activity companion")
                                 .description("Arrange a local host to accompany you during a planned cultural activity.")
                                 .preference("Agree on the activity and schedule with the operator in advance.")
                                 .price(new BigDecimal("50.00"))
                                 .available(true)
                                 .build()),
-                        Objects.requireNonNull(AddOn.builder()
+                        Objects.requireNonNull(OptionalExperience.builder()
                                 .name("Guided cultural exchange")
                                 .description("Take part in a guided cultural exchange with a local community.")
                                 .preference("The activity and community participation must be confirmed by the operator before the booking is finalized.")
                                 .price(new BigDecimal("40.00"))
                                 .available(true)
                                 .build()),
-                        Objects.requireNonNull(AddOn.builder()
+                        Objects.requireNonNull(OptionalExperience.builder()
                                 .name("Customized cultural experience")
                                 .description("Request a personalized activity tailored to your interests.")
                                 .preference("The activity, schedule, and itinerary must be confirmed by the operator or community before the booking is finalized.")
@@ -234,11 +234,12 @@ public class SeedData {
 
             if (!hasActiveDepartures) {
 
-                Departure departure = Departure.builder()
+                Departure departure = Objects.requireNonNull(
+                        Departure.builder()
                         .tour(tour)
                         .startDate(LocalDate.now().plusDays(30))
                         .capacity(10)
-                        .build();
+                        .build() );
 
                 departures.save(departure);
 

@@ -21,13 +21,13 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "add_ons")
+@Table(name = "optional_experiences")
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AddOn {
+public class OptionalExperience {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,7 +49,7 @@ public class AddOn {
     private BigDecimal price;
 
     @Builder
-    public AddOn(
+    public OptionalExperience(
             String name,
             String description,
             String preference,
@@ -65,7 +65,7 @@ public class AddOn {
         );
     }
 
-    public AddOn(
+    public OptionalExperience(
             Long id,
             String name,
             String description,
@@ -97,25 +97,25 @@ public class AddOn {
 
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException(
-                    "Special experience name is required."
+                    "OptionalExperience name is required."
             );
         }
 
         if (description == null || description.isBlank()) {
             throw new IllegalArgumentException(
-                    "Special experience description is required."
+                    "OptionalExperience description is required."
             );
         }
 
         if (preference == null) {
             throw new IllegalArgumentException(
-                    "Special experience service requirements are required."
+                    "OptionalExperience service requirements are required."
             );
         }
 
         if (price == null || price.signum() < 0) {
             throw new IllegalArgumentException(
-                    "Special experience price cannot be negative."
+                    "OptionalExperience price cannot be negative."
             );
         }
 
@@ -132,7 +132,7 @@ public class AddOn {
 
         if (price == null || price.signum() < 0) {
             throw new IllegalArgumentException(
-                    "Special experience price cannot be negative."
+                    "OptionalExperience price cannot be negative."
             );
         }
     }

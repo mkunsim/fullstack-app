@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -41,19 +42,26 @@ class CarPaymentControllerTest {
     private HttpServletRequest request;
 
     private CarPaymentController controller;
-    private CarBooking booking;
+    @NonNull
+    private final CarBooking booking = createBooking();
 
     @BeforeEach
     void setUp() {
         controller = new CarPaymentController(
                 bookings, paymentProvider, completionService, authService, conversionService);
-        AppUser customer = AppUser.builder()
+        when(authService.customerEmailFromRequest(request)).thenReturn("guest@example.com");
+        when(bookings.findByIdForUpdate(22L)).thenReturn(Optional.of(booking));
+    }
+
+    @NonNull
+    private static CarBooking createBooking() {
+        AppUser customer = Objects.requireNonNull(AppUser.builder()
                 .email("guest@example.com")
                 .passwordHash("hash")
                 .fullName("Guest")
                 .role(Role.CUSTOMER)
-                .build();
-        booking = CarBooking.builder()
+                .build());
+        return Objects.requireNonNull(CarBooking.builder()
                 .id(22L)
                 .customer(customer)
                 .currency("USD")
@@ -61,9 +69,7 @@ class CarPaymentControllerTest {
                 .status(CarBookingStatus.CONFIRMED.name())
                 .paymentStatus(PaymentStatus.UNPAID)
                 .paymentCurrency("KES")
-                .build();
-        when(authService.customerEmailFromRequest(request)).thenReturn("guest@example.com");
-        when(bookings.findByIdForUpdate(22L)).thenReturn(Optional.of(booking));
+                .build());
     }
 
     @Test

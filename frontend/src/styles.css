@@ -151,7 +151,7 @@ a {
   position: relative;
   z-index: 20;
   min-height: 72px;
-  padding: 0 clamp(20px, 5vw, 72px);
+  padding: 0 clamp(20px, 5vw, 72px) 0 clamp(12px, 1.5vw, 22px);
   color: var(--color-white);
   background: var(--color-charcoal);
 }
@@ -162,6 +162,13 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 28px;
+}
+
+.header-brand-group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
 }
 
 .brand {
@@ -225,6 +232,35 @@ a {
   flex: 0 0 auto;
   align-items: center;
   gap: 12px;
+}
+
+.header-back-button {
+  display: inline-flex;
+  min-width: 62px;
+  height: 36px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-inline: 8px;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--color-gold);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.header-back-button:hover:not(:disabled) {
+  background: rgba(229, 166, 56, 0.16);
+  color: var(--color-white);
+}
+
+.header-back-button:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
 }
 
 .signed-in {
@@ -407,6 +443,25 @@ button:disabled {
   color: rgba(255, 255, 255, 0.88);
   font-size: clamp(1rem, 2vw, 1.2rem);
   line-height: 1.7;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-actions .hero-secondary-btn {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-white);
+}
+
+.hero-actions .hero-secondary-btn:hover {
+  border-color: var(--color-white);
+  background: var(--color-white);
+  color: var(--color-charcoal);
 }
 
 /* Homepage featured safaris */
@@ -610,6 +665,82 @@ button:disabled {
   color: var(--color-gold-dark);
 }
 
+.destination-highlights {
+  padding: 0 clamp(20px, 6vw, 86px) 56px;
+}
+
+.destination-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.destination-card {
+  position: relative;
+  display: block;
+  min-height: 270px;
+  overflow: hidden;
+  border-radius: var(--radius-medium);
+  background: var(--color-charcoal);
+  color: var(--color-white);
+}
+
+.destination-card > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.destination-card::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(17, 29, 21, 0.88), rgba(17, 29, 21, 0.04) 76%);
+  content: "";
+}
+
+.destination-card:hover > img {
+  transform: scale(1.04);
+}
+
+.destination-card-content {
+  position: absolute;
+  z-index: 1;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  display: grid;
+  gap: 7px;
+}
+
+.destination-card-content > span:first-child {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.destination-card-content h3 {
+  color: var(--color-white);
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.destination-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  color: var(--color-gold);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .promise-item strong,
 .promise-item small {
   display: block;
@@ -626,6 +757,35 @@ button:disabled {
 }
 
 /* Scenic banner and visit count */
+.whatsapp-button {
+  position: fixed;
+  z-index: 25;
+  right: clamp(16px, 4vw, 36px);
+  bottom: clamp(16px, 4vw, 32px);
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #25d366;
+  box-shadow: var(--shadow-medium);
+  color: var(--color-white);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.whatsapp-button:hover {
+  background: #1fbd5a;
+  transform: translateY(-2px);
+}
+
+.whatsapp-button:focus-visible {
+  outline: 3px solid var(--color-charcoal);
+  outline-offset: 3px;
+}
+
 .scenic-banner {
   padding: 28px clamp(20px, 6vw, 86px);
   background: var(--color-charcoal);
@@ -665,7 +825,7 @@ button:disabled {
   gap: 8px;
   padding: 8px 12px;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 3px;
+  border-radius: 999px;
   background: #2b261d;
   color: var(--color-white);
   white-space: nowrap;
@@ -680,9 +840,38 @@ button:disabled {
 }
 
 .scenic-footer-content .rating-badge .rating-badge-stars {
+  position: relative;
+  display: inline-block;
   color: #f0a000;
   font-size: 1.15rem;
   letter-spacing: 0;
+  line-height: 1;
+}
+
+.rating-stars-track {
+  display: block;
+  color: rgba(255, 255, 255, 0.38) !important;
+  white-space: nowrap;
+}
+
+.rating-stars-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  overflow: hidden;
+  color: #f0a000 !important;
+  white-space: nowrap;
+}
+
+.scenic-footer-content .rating-badge .rating-stars-track,
+.scenic-footer-content .rating-badge .rating-stars-fill {
+  font-size: 1.15rem;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.scenic-footer-content .rating-badge .rating-badge-score {
+  color: var(--color-white);
+  font-variant-numeric: tabular-nums;
 }
 
 .scenic-footer-content .rating-badge strong {
@@ -706,28 +895,28 @@ button:disabled {
 
 .review-modal {
   position: relative;
-  width: min(100%, 580px);
-  max-height: min(760px, calc(100vh - 40px));
+  width: min(100%, 440px);
+  max-height: calc(100vh - 40px);
   overflow-y: auto;
-  padding: 28px clamp(20px, 5vw, 36px);
+  padding: 22px 24px;
   border: 1px solid #dadce0;
-  border-radius: 18px;
+  border-radius: 14px;
   background: #fff;
   box-shadow: var(--shadow-medium);
   color: #202124;
 }
 
 .review-modal h2 {
-  margin: 0 36px 26px;
+  margin: 0 32px 16px;
   color: #202124;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 500;
   text-align: center;
 }
 
 .review-form {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .review-prompt {
@@ -739,17 +928,17 @@ button:disabled {
 .review-stars {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 8px;
+  gap: 7px;
+  margin-bottom: 2px;
 }
 
 .review-stars button {
-  min-width: 38px;
+  min-width: 34px;
   padding: 0;
   border: 0;
   background: transparent;
   color: #80868b;
-  font-size: 2rem;
+  font-size: 1.65rem;
   line-height: 1.2;
 }
 
@@ -758,15 +947,15 @@ button:disabled {
 }
 
 .review-label {
-  margin-bottom: -8px;
+  margin-bottom: -5px;
   color: #5f6368;
-  font-size: 0.9rem;
+  font-size: 0.84rem;
 }
 
 .review-form textarea {
   width: 100%;
-  min-height: 104px;
-  padding: 14px;
+  min-height: 88px;
+  padding: 11px 12px;
   border: 1px solid #80868b;
   border-radius: 4px;
   background: #fff;
@@ -783,8 +972,13 @@ button:disabled {
 .review-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 4px;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.review-actions button {
+  min-height: 38px;
+  padding: 8px 14px;
 }
 
 .review-error {
@@ -1482,6 +1676,18 @@ button:disabled {
   margin-inline: auto;
 }
 
+.account-page--signed-out .section-head {
+  max-width: 700px;
+  justify-content: center;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.account-page--signed-out .account-signin .primary-btn {
+  display: block;
+  margin: 10px auto 0;
+}
+
 .account-signin .primary-btn {
   margin-top: 10px;
 }
@@ -1836,13 +2042,22 @@ td small {
   }
 
   .header {
-    padding-inline: 16px;
+    padding-right: 16px;
+    padding-left: 8px;
   }
 
   .nav {
     position: relative;
     justify-content: space-between;
     gap: 12px;
+  }
+
+  .header-with-back .nav {
+    gap: 6px;
+  }
+
+  .header-brand-group {
+    gap: 6px;
   }
 
   /* Brand sizing */
@@ -1954,6 +2169,15 @@ td small {
     width: 100%;
   }
 
+  .hero-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hero-actions .hero-secondary-btn {
+    justify-content: center;
+  }
+
   /* -------------------------------------------------------
      Featured safaris & cards
      ------------------------------------------------------- */
@@ -1994,6 +2218,18 @@ td small {
     margin: 0 18px 34px;
   }
 
+  .destination-highlights {
+    padding: 0 18px 38px;
+  }
+
+  .destination-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .destination-card {
+    min-height: 230px;
+  }
+
   .promise-item {
     padding: 16px;
   }
@@ -2018,6 +2254,11 @@ td small {
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .whatsapp-button {
+    right: 16px;
+    bottom: 16px;
   }
 
   /* -------------------------------------------------------
@@ -2232,6 +2473,11 @@ td small {
   /* Modal spacing */
   .modal {
     padding: 28px 20px;
+  }
+
+  .review-modal {
+    max-height: calc(100dvh - 24px);
+    padding: 20px 18px;
   }
 
   /* Modal scrolling */

@@ -3,6 +3,7 @@ package com.example.safari.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -20,12 +21,12 @@ public class CorsConfig {
     ) {
         return new WebMvcConfigurer() {
             @Override
-            public void addInterceptors(InterceptorRegistry registry) {
+            public void addInterceptors(@NonNull InterceptorRegistry registry) {
                 registry.addInterceptor(Objects.requireNonNull(adminAuthorizationInterceptor));
             }
 
             @Override
-            public void addCorsMappings(CorsRegistry registry) {
+            public void addCorsMappings(@NonNull CorsRegistry registry) {
                 Objects.requireNonNull(registry);
                 registry.addMapping("/api/**")
                     .allowedOrigins("http://localhost:5173",

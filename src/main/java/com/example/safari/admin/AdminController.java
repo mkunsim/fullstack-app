@@ -1,8 +1,8 @@
 
 package com.example.safari.admin;
 
-import com.example.safari.booking.AddOn;
-import com.example.safari.booking.AddOnRepository;
+import com.example.safari.booking.OptionalExperience;
+import com.example.safari.booking.OptionalExperienceRepository;
 import com.example.safari.booking.Booking;
 import com.example.safari.booking.BookingRepository;
 import com.example.safari.booking.BookingService;
@@ -15,6 +15,7 @@ import jakarta.validation.constraints.*;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,20 +32,20 @@ public class AdminController {
     private final DepartureRepository departures;
     private final BookingRepository bookings;
     private final BookingService bookingService;
-    private final AddOnRepository addOns;
+    private final OptionalExperienceRepository optionalExperiences;
 
     public AdminController(
             TourRepository tours,
             DepartureRepository departures,
             BookingRepository bookings,
             BookingService bookingService,
-            AddOnRepository addOns
+            OptionalExperienceRepository optionalExperiences
     ) {
         this.tours = tours;
         this.departures = departures;
         this.bookings = bookings;
         this.bookingService = bookingService;
-        this.addOns = addOns;
+        this.optionalExperiences = optionalExperiences;
     }
 
     // ==========================================
@@ -61,11 +62,11 @@ public class AdminController {
             boolean active
     ) {}
 
-    public record AddOnSelection(
+    public record OptionalExperienceSelection(
             boolean selected
     ) {}
 
-    public record AddOnInput(
+    public record OptionalExperienceInput(
             @NotBlank @Size(max = 150) String name,
             @NotBlank @Size(max = 2000) String description,
             @NotBlank @Size(max = 2000) String preference,
@@ -90,7 +91,7 @@ public class AdminController {
             String currency,
             String status,
             String paymentStatus,
-            List<BookingController.AddOnView> addOns
+            List<BookingController.OptionalExperienceView> optionalExperiences
     ) {}
 
     public record BookingStatusRequest(
@@ -160,20 +161,20 @@ public class AdminController {
     // GLOBAL ADD-ON MANAGEMENT
     // ==========================================
 
-    @GetMapping("/add-ons")
+    @GetMapping("/optional-experiences")
     @Transactional(readOnly = true)
-    public List<AddOn> allAddOns() {
-        return addOns.findAllByOrderByIdAsc();
+    public List<OptionalExperience> allOptionalExperiences() {
+        return optionalExperiences.findAllByOrderByIdAsc();
     }
 
-    @PostMapping("/add-ons")
+    @PostMapping("/optional-experiences")
     @ResponseStatus(HttpStatus.CREATED)
-    public AddOn createAddOn(
-            @Valid @RequestBody AddOnInput request
+    public OptionalExperience createOptionalExperience(
+            @Valid @RequestBody OptionalExperienceInput request
     ) {
 
-        AddOn addOn = Objects.requireNonNull(
-                AddOn.builder()
+        OptionalExperience optionalExperience = Objects.requireNonNull(
+                OptionalExperience.builder()
                         .name(request.name())
                         .description(request.description())
                         .preference(request.preference())
@@ -182,45 +183,45 @@ public class AdminController {
                         .build()
         );
 
-        return addOns.save(addOn);
+        return optionalExperiences.save(optionalExperience);
     }
 
-    @PutMapping("/add-ons/{id}")
-    public AddOn updateAddOn(
-            @PathVariable Long id,
-            @Valid @RequestBody AddOnInput request
+    @PutMapping("/optional-experiences/{id}")
+    public OptionalExperience updateOptionalExperience(
+            @PathVariable @NonNull Long id,
+            @Valid @RequestBody OptionalExperienceInput request
     ) {
 
-        AddOn addOn = addOns.findById(id)
+        OptionalExperience optionalExperience = optionalExperiences.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Add-on not found."
+                        "Optional experience not found."
                 ));
 
-        addOn.setName(request.name());
-        addOn.setDescription(request.description());
-        addOn.setPreference(request.preference());
-        addOn.setPrice(request.price());
-        addOn.setAvailable(request.available());
+        optionalExperience.setName(request.name());
+        optionalExperience.setDescription(request.description());
+        optionalExperience.setPreference(request.preference());
+        optionalExperience.setPrice(request.price());
+        optionalExperience.setAvailable(request.available());
 
-        return addOns.save(addOn);
+        return optionalExperiences.save(optionalExperience);
     }
 
-    @PutMapping("/add-ons/{id}/availability")
-    public AddOn updateAddOnAvailability(
-            @PathVariable Long id,
-            @Valid @RequestBody AddOnSelection request
+    @PutMapping("/optional-experiences/{id}/availability")
+    public OptionalExperience updateOptionalExperienceAvailability(
+            @PathVariable @NonNull Long id,
+            @Valid @RequestBody OptionalExperienceSelection request
     ) {
 
-        AddOn addOn = addOns.findById(id)
+        OptionalExperience optionalExperience = optionalExperiences.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Add-on not found."
+                        "Optional experience not found."
                 ));
 
-        addOn.setAvailable(request.selected());
+        optionalExperience.setAvailable(request.selected());
 
-        return addOns.save(addOn);
+        return optionalExperiences.save(optionalExperience);
     }
 
     // ==========================================
@@ -331,13 +332,13 @@ public class AdminController {
                 booking.getCurrency(),
                 booking.getStatus().name(),
                 booking.getPaymentStatus().name(),
-                booking.getAddOns().stream()
-                        .map(addOn -> new BookingController.AddOnView(
-                                addOn.getExperienceId(),
-                                addOn.getName(),
-                                addOn.getDescription(),
-                                addOn.getPreference(),
-                                addOn.getPrice()
+                booking.getOptionalExperiences().stream()
+                        .map(optionalExperience -> new BookingController.OptionalExperienceView(
+                                optionalExperience.getExperienceId(),
+                                optionalExperience.getName(),
+                                optionalExperience.getDescription(),
+                                optionalExperience.getPreference(),
+                                optionalExperience.getPrice()
                         ))
                         .toList()
         );

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.lang.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.server.ResponseStatusException;
@@ -55,9 +56,13 @@ class PaymentControllerTest {
 
     private PaymentController paymentController;
 
-    private final Booking pendingBooking = createBooking(BookingStatus.PENDING, false);
+    @NonNull
+    private final Booking pendingBooking = Objects.requireNonNull(
+            createBooking(BookingStatus.PENDING, false));
 
-    private final Booking confirmedBooking = createBooking(BookingStatus.CONFIRMED, true);
+    @NonNull
+    private final Booking confirmedBooking = Objects.requireNonNull(
+            createBooking(BookingStatus.CONFIRMED, true));
 
     @BeforeEach
     void setUp() {

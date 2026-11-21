@@ -20,8 +20,8 @@ class HitCountControllerTest {
     @Mock
     private SitePageHitRepository pageHits;
 
-    @SuppressWarnings("null")
     @Test
+    @SuppressWarnings("null") // Mockito's argThat matcher uses null as a stubbing sentinel.
     void incrementsCounterAndRecordsFirstVisitForPage() {
         SiteHitCounter counter = new SiteHitCounter(SiteHitCounter.SINGLETON_ID, 41);
         when(counters.findByIdForUpdate(SiteHitCounter.SINGLETON_ID)).thenReturn(Optional.of(counter));
